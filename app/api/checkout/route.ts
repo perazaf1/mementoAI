@@ -57,10 +57,7 @@ export async function POST(req: NextRequest) {
 
   if (!res.ok) {
     console.error('Lemon Squeezy error', res.status, responseText)
-    return NextResponse.json(
-      { error: `Checkout failed (${res.status})`, detail: responseText },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Checkout unavailable' }, { status: 500 })
   }
 
   const data = JSON.parse(responseText)
