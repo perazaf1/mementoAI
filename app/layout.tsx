@@ -1,9 +1,24 @@
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Memento — Récite. Retiens.',
-  description: 'Récite ton cours à voix haute. Memento analyse ta récitation et te donne un feedback structuré pour mémoriser vraiment.',
+  description: 'Récite ton cours à voix haute. Memento analyse ta récitation et te donne un feedback structuré sur ce que tu sais, ce qui manque, et comment progresser.',
+  metadataBase: new URL('https://memento-ai-delta.vercel.app'),
+  openGraph: {
+    title: 'Memento — Récite. Retiens.',
+    description: 'Récite ton cours à voix haute. Memento analyse ta récitation et te donne un feedback structuré pour mémoriser vraiment.',
+    url: 'https://memento-ai-delta.vercel.app',
+    siteName: 'Memento',
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Memento — Récite. Retiens.',
+    description: 'Récite ton cours à voix haute. Memento analyse ta récitation et te donne un feedback structuré pour mémoriser vraiment.',
+  },
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -18,7 +33,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }

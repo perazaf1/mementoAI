@@ -7,6 +7,7 @@ import { AppProvider, useApp, type AppMode } from '@/context/AppContext'
 import InputScreen from '@/components/InputScreen'
 import RecordingScreen from '@/components/RecordingScreen'
 import FeedbackScreen from '@/components/FeedbackScreen'
+import OnboardingModal from '@/components/OnboardingModal'
 import { createClient } from '@/utils/supabase/client'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { type UILang } from '@/lib/i18n'
@@ -341,16 +342,28 @@ function AppShell() {
       {/* Upgrade success banner */}
       {showUpgradedBanner && (
         <div style={{
-          background: 'var(--green-bg)', borderBottom: '1px solid var(--green-border)',
-          padding: '10px 28px', display: 'flex', alignItems: 'center', gap: '10px',
-          fontSize: '13px', color: 'var(--green)', flexShrink: 0,
+          background: 'var(--accent)', padding: '12px 20px',
+          display: 'flex', alignItems: 'center', gap: '12px',
+          flexShrink: 0, flexWrap: 'wrap',
         }}>
-          <span>🎉</span>
-          <span>Bienvenue dans le plan Pro ! Tes nouvelles limites sont actives.</span>
+          <span style={{ fontSize: '18px' }}>🎉</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: '#fff' }}>
+              {profile?.plan === 'isep' ? 'Plan ISEP activé !' : 'Plan Pro activé !'}
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.75)' }}>
+              {profile?.plan === 'isep'
+                ? '10 sessions par jour et 25 000 caractères sont maintenant disponibles.'
+                : '20 sessions par jour, mode code et 11 langues sont maintenant disponibles.'}
+            </p>
+          </div>
           <button onClick={() => setShowUpgradedBanner(false)} style={{
-            marginLeft: 'auto', background: 'none', border: 'none',
-            cursor: 'pointer', color: 'var(--green)', fontSize: '16px', lineHeight: 1,
-          }}>×</button>
+            background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '6px',
+            cursor: 'pointer', color: '#fff', fontSize: '13px', fontWeight: 500,
+            padding: '4px 10px', flexShrink: 0,
+          }}>
+            OK
+          </button>
         </div>
       )}
 
@@ -387,6 +400,8 @@ function AppShell() {
           )}
         </div>
       </main>
+
+      <OnboardingModal lang={uiLang} />
     </div>
   )
 }
