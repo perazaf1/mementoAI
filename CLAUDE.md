@@ -18,17 +18,19 @@ The app is **live in production** at `https://memento-ai-delta.vercel.app`.
 
 What is fully built and deployed:
 - Auth (email+password + Google OAuth, password reset flow)
-- Signup redirects directly to `/app` — no email confirmation message (confirmations disabled in Supabase)
+- Signup redirects directly to `/app` — no email confirmation (confirmations disabled in Supabase, will stay disabled)
 - Supabase DB with session limits per plan
-- Lemon Squeezy payment (checkout + webhook)
+- Lemon Squeezy payment (checkout + webhook) — Pro and ISEP CTAs on landing page wired to checkout
 - Responsive design (mobile + desktop)
 - Security hardening (RLS, headers, CSP)
+- `supabaseAdmin` client (`utils/supabase/admin.ts`) using `SUPABASE_SERVICE_ROLE_KEY` — used by webhook and feedback routes
+- Atomic session consumption via SQL function `try_consume_session` (migration 003 applied)
+- Onboarding modal on first `/app` visit (stored in `localStorage` key `memento_onboarded`)
+- SEO meta tags + Open Graph in `app/layout.tsx`
+- Vercel Analytics (`@vercel/analytics`) active in production
 
-What remains to build:
-- `SUPABASE_SERVICE_ROLE_KEY` + `supabaseAdmin` client for the webhook route (currently uses publishable key)
-- Atomic session consumption via SQL function `try_consume_session` (race condition fix)
-- Custom SMTP for transactional emails (currently email confirmations are disabled in Supabase)
-- Lemon Squeezy payment UI on landing page (Pro CTA button points to `/app`, not checkout)
+Nothing critical remains to build. Optional future work:
+- Custom SMTP for transactional emails (password reset currently uses Supabase default SMTP)
 
 ## Architecture
 
@@ -40,12 +42,12 @@ What remains to build:
 - `/auth/reset-password` — Send password reset email.
 - `/auth/update-password` — Set new password (Supabase redirects here after reset link click).
 - `/auth/callback` — OAuth callback route.
-- `POST /api/feedback` — Calls Claude API. Checks auth + session limits, saves recitation, increments sessions_today. Accepts `{ courseText, transcript, feedbackLang, mode }`, returns `{ feedback, sessionsUsed, sessionsLimit }`.
+- `POST /api/feedback` — Calls Claude API. Uses `try_consume_session` RPC for atomic session check+increment. Saves recitation via `supabaseAdmin`. Accepts `{ courseText, transcript, feedbackLang, mode }`, returns `{ feedback, sessionsUsed, sessionsLimit }`.
 - `POST /api/extract-pdf` — Server-side PDF text extraction via `pdf-parse` (dynamic import required — see `next.config.js`).
-- `POST /api/checkout` — Creates a Lemon Squeezy checkout URL for Pro or ISEP plan upgrade.
-- `POST /api/webhooks/lemonsqueezy` — Receives `subscription_created` / `subscription_updated` events, verifies HMAC signature, updates `users.plan` in Supabase.
+- `POST /api/checkout` — Creates a Lemon Squeezy checkout URL for Pro or ISEP plan upgrade. Returns 401 if not authenticated (client redirects to `/auth/login`).
+- `POST /api/webhooks/lemonsqueezy` — Receives `subscription_created` / `subscription_updated` events, verifies HMAC signature, updates `users.plan` via `supabaseAdmin`.
 
-**Core loop:** User logs in → inputs course text → records voice via Web Speech API → transcript + course text sent to `/api/feedback` → session limit checked → Claude returns 4-section markdown → `FeedbackScreen` parses and renders it → recitation saved to DB.
+**Core loop:** User logs in → onboarding modal (first time only) → inputs course text → records voice via Web Speech API → transcript + course text sent to `/api/feedback` → session limit checked atomically → Claude returns 4-section markdown → `FeedbackScreen` parses and renders it → recitation saved to DB.
 
 ## Auth & Middleware
 
@@ -57,7 +59,9 @@ What remains to build:
 Supabase clients:
 - `utils/supabase/server.ts` — server-side (API routes, Server Components).
 - `utils/supabase/client.ts` — browser-side (Client Components).
-- `utils/supabase/admin.ts` — NOT YET CREATED. Should use `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS. Needed for the webhook route.
+- `utils/supabase/admin.ts` — lazy singleton using `SUPABASE_SERVICE_ROLE_KEY`, bypasses RLS. Used in `/api/feedback` and `/api/webhooks/lemonsqueezy`.
+
+**Deleting test users:** Always delete from Supabase dashboard → Authentication → Users (not from Table Editor). This removes both `auth.users` and `public.users`. Deleting only from `public.users` leaves the auth record and blocks re-signup with the same email.
 
 ## Translations — two separate systems
 
@@ -71,7 +75,7 @@ Auth pages (`/auth/*`) each have their own local `COPY = { fr, en }` object. Lan
 
 ## State Management
 
-Single `AppContext` (`context/AppContext.tsx`) holds global app state: `uiLang` (fr/en), `feedbackLang` (11 languages + auto), `mode` (course/code), and the `t(key)` translation function. Local state for the session flow (step, courseText, transcript, feedback) lives in `AppShell` inside `app/app/page.tsx`. User profile (plan, sessions_today) is fetched in `AppShell` via Supabase client and passed down as props.
+Single `AppContext` (`context/AppContext.tsx`) holds global app state: `uiLang` (fr/en), `feedbackLang` (11 languages + auto), `mode` (course/code), and the `t(key)` translation function. `uiLang` is loaded from `localStorage` on mount and persisted on change. Local state for the session flow (step, courseText, transcript, feedback) lives in `AppShell` inside `app/app/page.tsx`. User profile (plan, sessions_today) is fetched in `AppShell` via Supabase client and passed down as props.
 
 ## Supabase Schema
 
@@ -92,6 +96,9 @@ Plans: `'free'` | `'pro'` | `'isep'`
 - `recitations_insert_own` — INSERT only for own user_id
 
 A Postgres trigger (`handle_new_user`) auto-creates a `users` row on signup and sets `plan = 'isep'` if email ends with `@eleve.isep.fr`.
+
+**Atomic session function (migration 003 applied):**
+`try_consume_session(p_user_id UUID)` — locks the row, resets counter if new day, checks limit, increments. Returns `'ok'` | `'limit_reached'` | `'user_not_found'`. Called via `supabaseAdmin.rpc(...)` in `/api/feedback`.
 
 To manually upgrade a user to Pro, run in Supabase SQL Editor:
 ```sql
@@ -121,11 +128,10 @@ Limits are enforced both client-side (`components/InputScreen.tsx`) and server-s
 - Store: `mementoai-app.lemonsqueezy.com` — Store ID: `365953`
 - Pro variant ID: `1614994` (8€/mois)
 - ISEP variant ID: `1614998` (5€/mois)
-- Checkout flow: client calls `POST /api/checkout` → server creates checkout via LS API → returns URL → client redirects.
+- Checkout flow: client calls `POST /api/checkout` → server creates checkout via LS API → returns URL → client redirects. If not authenticated, returns 401 and client redirects to `/auth/login`.
 - Webhook URL (prod): `https://memento-ai-delta.vercel.app/api/webhooks/lemonsqueezy`
-- Webhook: `POST /api/webhooks/lemonsqueezy` — verifies `x-signature` (HMAC SHA256), handles `subscription_created` and `subscription_updated`, updates `users.plan`.
-- After successful payment, user is redirected to `/app?upgraded=1` which shows a success banner.
-- ⚠️ The webhook currently uses the publishable Supabase key (not service role). Should be migrated to `supabaseAdmin` to bypass RLS safely.
+- Webhook: `POST /api/webhooks/lemonsqueezy` — verifies `x-signature` (HMAC SHA256), handles `subscription_created` and `subscription_updated`, updates `users.plan` via `supabaseAdmin`.
+- After successful payment, user is redirected to `/app?upgraded=1` which shows a prominent blue banner with plan details.
 
 ## Speech Recognition
 
@@ -150,18 +156,18 @@ The app uses **inline styles** (not CSS modules or Tailwind component classes) f
 
 Fonts: `Cormorant` (serif, headings) and `DM Sans` (body), loaded via Google Fonts in `globals.css`. The landing page hero uses `#0C1420` as its dark background (not a CSS variable).
 
+**No emojis in UI.** Always use SVG icons that match the design tokens. The user dislikes emojis in components.
+
 ## Security
 
 Applied hardening (all in production):
 - **RLS** — `users_update_sessions_only` prevents users from self-upgrading their plan (migration `002_fix_rls.sql`)
+- **supabaseAdmin** — service role client used for webhook and feedback routes, bypasses RLS safely
+- **Atomic sessions** — `try_consume_session` SQL function prevents race conditions (migration `003_try_consume_session.sql`)
 - **Security headers** — X-Frame-Options, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP (in `next.config.js`)
 - **CSP** — whitelists `*.supabase.co`, `fonts.googleapis.com`, `fonts.gstatic.com`, `*.lemonsqueezy.com`, `api.anthropic.com`
 - **Webhook signature** — HMAC SHA256 verified on every Lemon Squeezy webhook
 - **No error detail leakage** — API routes return generic error messages to the client
-
-Remaining security tasks:
-- Add `SUPABASE_SERVICE_ROLE_KEY` + `supabaseAdmin` for the webhook route
-- Replace session increment logic in `/api/feedback` with atomic SQL function `try_consume_session` (prevents race condition on simultaneous requests)
 
 ## Environment Variables
 
@@ -171,9 +177,9 @@ All secrets are server-side only except Supabase public keys.
 ANTHROPIC_API_KEY                    # Claude API
 NEXT_PUBLIC_SUPABASE_URL             # Supabase project URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY # Supabase anon/publishable key
-SUPABASE_SERVICE_ROLE_KEY            # NOT YET ADDED — needed for webhook + admin ops
+SUPABASE_SERVICE_ROLE_KEY            # Supabase service role key (used by supabaseAdmin)
 LEMONSQUEEZY_API_KEY                 # Lemon Squeezy API key
-LEMONSQUEEZY_WEBHOOK_SECRET          # Lemon Squeezy webhook signing secret (regenerated)
+LEMONSQUEEZY_WEBHOOK_SECRET          # Lemon Squeezy webhook signing secret
 LEMONSQUEEZY_STORE_ID                # 365953
 LEMONSQUEEZY_PRO_VARIANT_ID          # 1614994
 LEMONSQUEEZY_ISEP_VARIANT_ID         # 1614998
@@ -187,4 +193,5 @@ Never import Anthropic or Lemon Squeezy clients in client components. Supabase b
 - Hosted on Vercel. Each push to `main` triggers an automatic redeploy.
 - **Supabase redirect URLs configured**: `/auth/callback` and `/auth/update-password`
 - **Lemon Squeezy webhook configured** pointing to production URL
-- Email confirmations are **disabled** in Supabase (re-enable once custom SMTP is set up)
+- Email confirmations are **disabled** in Supabase (intentional — no custom SMTP planned)
+- Vercel Analytics active — stats available in Vercel dashboard
