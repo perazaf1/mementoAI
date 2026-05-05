@@ -17,7 +17,8 @@ export function useSpeechRecognition(): SpeechRecognitionState {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [interimTranscript, setInterimTranscript] = useState('')
-  const recognitionRef = useRef<InstanceType<typeof window.SpeechRecognition> | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
   const finalRef = useRef('')
 
   useEffect(() => {
