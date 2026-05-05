@@ -18,6 +18,7 @@ The app is **live in production** at `https://memento-ai-delta.vercel.app`.
 
 What is fully built and deployed:
 - Auth (email+password + Google OAuth, password reset flow)
+- Signup redirects directly to `/app` — no email confirmation message (confirmations disabled in Supabase)
 - Supabase DB with session limits per plan
 - Lemon Squeezy payment (checkout + webhook)
 - Responsive design (mobile + desktop)
