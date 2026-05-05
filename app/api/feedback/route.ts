@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { buildCoursePrompt, buildCodePrompt } from '@/lib/claude'
 import { createClient } from '@/utils/supabase/server'
+import { supabaseAdmin } from '@/utils/supabase/admin'
 
 const anthropic = new Anthropic()
 
@@ -21,34 +22,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('users')
-      .select('plan, sessions_today, last_reset_date')
-      .eq('id', user.id)
-      .single()
+    // Atomically consume a session (handles reset + limit check in one locked DB call)
+    const { data: consumeResult, error: consumeError } = await supabaseAdmin
+      .rpc('try_consume_session', { p_user_id: user.id })
 
-    if (profileError || !profile) {
+    if (consumeError) {
+      console.error('try_consume_session error:', consumeError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+
+    if (consumeResult === 'user_not_found') {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
     }
 
-    // Reset sessions if it's a new day
-    const today = new Date().toISOString().split('T')[0]
-    let sessionsToday = profile.sessions_today
-
-    if (profile.last_reset_date !== today) {
-      await supabase
+    if (consumeResult === 'limit_reached') {
+      // Fetch plan info for the response
+      const { data: profile } = await supabaseAdmin
         .from('users')
-        .update({ sessions_today: 0, last_reset_date: today })
+        .select('plan, sessions_today')
         .eq('id', user.id)
-      sessionsToday = 0
-    }
-
-    // Check session limit
-    const limit = SESSION_LIMITS[profile.plan] ?? SESSION_LIMITS.free
-    if (sessionsToday >= limit) {
+        .single()
+      const plan = profile?.plan ?? 'free'
+      const limit = SESSION_LIMITS[plan] ?? SESSION_LIMITS.free
       return NextResponse.json(
-        { error: 'session_limit_reached', limit, plan: profile.plan },
+        { error: 'session_limit_reached', limit, plan },
         { status: 429 }
       )
     }
@@ -76,24 +73,25 @@ export async function POST(req: NextRequest) {
       .map((block) => (block as { type: 'text'; text: string }).text)
       .join('\n')
 
-    // Save recitation + increment sessions (in parallel)
-    await Promise.all([
-      supabase.from('recitations').insert({
+    // Fetch updated session count for the response + save recitation (in parallel)
+    const [{ data: updatedProfile }] = await Promise.all([
+      supabaseAdmin.from('users').select('plan, sessions_today').eq('id', user.id).single(),
+      supabaseAdmin.from('recitations').insert({
         user_id: user.id,
         mode,
         course_text: courseText,
         transcript,
         feedback,
       }),
-      supabase
-        .from('users')
-        .update({ sessions_today: sessionsToday + 1 })
-        .eq('id', user.id),
     ])
+
+    const plan = updatedProfile?.plan ?? 'free'
+    const sessionsUsed = updatedProfile?.sessions_today ?? 1
+    const limit = SESSION_LIMITS[plan] ?? SESSION_LIMITS.free
 
     return NextResponse.json({
       feedback,
-      sessionsUsed: sessionsToday + 1,
+      sessionsUsed,
       sessionsLimit: limit,
     })
   } catch (err) {

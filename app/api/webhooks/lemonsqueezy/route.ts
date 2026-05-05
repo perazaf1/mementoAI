@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { createClient } from '@/utils/supabase/server'
+import { supabaseAdmin } from '@/utils/supabase/admin'
 
 const WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!
 const PRO_VARIANT_ID = process.env.LEMONSQUEEZY_PRO_VARIANT_ID!
@@ -46,10 +46,8 @@ export async function POST(req: NextRequest) {
     else if (variantId === PRO_VARIANT_ID) newPlan = 'pro'
   }
 
-  const supabase = await createClient()
-
   // Update by user_id (preferred) or fall back to email
-  const query = supabase.from('users').update({ plan: newPlan })
+  const query = supabaseAdmin.from('users').update({ plan: newPlan })
   const { error } = userId
     ? await query.eq('id', userId)
     : await query.eq('email', userEmail)
