@@ -47,34 +47,36 @@ const COPY = {
   },
 }
 
-const STEP_ICONS = [
-  // Document / paste
-  <svg key="doc" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/>
-    <line x1="16" y1="17" x2="8" y2="17"/>
-    <polyline points="10 9 9 9 8 9"/>
-  </svg>,
-  // Microphone
-  <svg key="mic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-    <line x1="12" y1="19" x2="12" y2="23"/>
-    <line x1="8" y1="23" x2="16" y2="23"/>
-  </svg>,
-  // Bar chart
-  <svg key="chart" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="20" x2="18" y2="10"/>
-    <line x1="12" y1="20" x2="12" y2="4"/>
-    <line x1="6" y1="20" x2="6" y2="14"/>
-  </svg>,
-]
+function StepIcon({ index }: { index: number }) {
+  const style = { flexShrink: 0 as const }
+  if (index === 0) return (
+    <svg style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
+  )
+  if (index === 1) return (
+    <svg style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+      <line x1="12" y1="19" x2="12" y2="23"/>
+      <line x1="8" y1="23" x2="16" y2="23"/>
+    </svg>
+  )
+  return (
+    <svg style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+  )
+}
 
 export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
   const [visible, setVisible] = useState(false)
   const [resolvedLang, setResolvedLang] = useState<'fr' | 'en'>(lang)
-  const t = COPY[resolvedLang]
 
   useEffect(() => {
     const saved = localStorage.getItem('uiLang')
@@ -89,6 +91,8 @@ export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
     setVisible(false)
   }
 
+  const t = COPY[resolvedLang]
+
   if (!visible) return null
 
   return (
@@ -99,7 +103,7 @@ export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
         style={{
           position: 'fixed', inset: 0, zIndex: 100,
           background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)',
-          animation: 'fadeIn 0.2s ease',
+          animation: 'onboardFadeIn 0.2s ease',
         }}
       />
 
@@ -118,7 +122,7 @@ export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
           width: '100%',
           maxWidth: '440px',
           pointerEvents: 'all',
-          animation: 'slideUp 0.25s ease',
+          animation: 'onboardSlideUp 0.25s ease',
         }}>
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
@@ -159,7 +163,7 @@ export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
                   alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  {STEP_ICONS[i]}
+                  <StepIcon index={i} />
                 </div>
                 <div style={{ paddingTop: '2px' }}>
                   <p style={{ margin: '0 0 3px', fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
@@ -207,8 +211,8 @@ export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
       </div>
 
       <style>{`
-        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
+        @keyframes onboardFadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes onboardSlideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
       `}</style>
     </>
   )
