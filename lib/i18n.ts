@@ -31,6 +31,7 @@ const t = {
     codePlaceholder: 'Colle ici ton extrait de code...',
     codeLimitWarning: 'Seules les 50 premières lignes seront analysées.',
     codeNote: 'Mode code : le feedback est toujours en anglais.',
+    aiDisclaimer: "Ce feedback est généré par une IA et peut contenir des erreurs. Fiez-vous toujours à votre cours ou à vos sources officielles.",
 
     // InputScreen — common
     importPdf: 'Importer un PDF',
@@ -102,6 +103,7 @@ const t = {
     codePlaceholder: 'Paste your code snippet here...',
     codeLimitWarning: 'Only the first 50 lines will be analyzed.',
     codeNote: 'Code mode: feedback is always in English.',
+    aiDisclaimer: "This feedback is AI-generated and may contain errors. Always refer to your course materials or official sources.",
 
     // InputScreen — common
     importPdf: 'Import a PDF',

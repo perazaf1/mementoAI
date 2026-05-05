@@ -268,6 +268,25 @@ export default function FeedbackScreen({
         </div>
       )}
 
+      {/* AI disclaimer */}
+      {!isLoading && (
+        <div style={{
+          marginTop: '24px',
+          padding: '10px 14px',
+          borderRadius: '8px',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '8px',
+        }}>
+          <span style={{ fontSize: '14px', lineHeight: 1, marginTop: '1px' }}>⚠️</span>
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)', lineHeight: 1.5 }}>
+            {t('aiDisclaimer')}
+          </p>
+        </div>
+      )}
+
       {/* Actions */}
       {!isLoading && (
         <div style={{
