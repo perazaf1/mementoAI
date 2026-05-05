@@ -280,7 +280,11 @@ export default function FeedbackScreen({
           alignItems: 'flex-start',
           gap: '8px',
         }}>
-          <span style={{ fontSize: '14px', lineHeight: 1, marginTop: '1px' }}>⚠️</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
           <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)', lineHeight: 1.5 }}>
             {t('aiDisclaimer')}
           </p>

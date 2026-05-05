@@ -346,7 +346,9 @@ function AppShell() {
           display: 'flex', alignItems: 'center', gap: '12px',
           flexShrink: 0, flexWrap: 'wrap',
         }}>
-          <span style={{ fontSize: '18px' }}>🎉</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
           <div style={{ flex: 1 }}>
             <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: '#fff' }}>
               {profile?.plan === 'isep' ? 'Plan ISEP activé !' : 'Plan Pro activé !'}
