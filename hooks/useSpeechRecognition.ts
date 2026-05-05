@@ -22,9 +22,9 @@ export function useSpeechRecognition(): SpeechRecognitionState {
   const finalRef = useRef('')
 
   useEffect(() => {
-    const SpeechRecognition =
-      (window as Window & { SpeechRecognition?: typeof window.SpeechRecognition; webkitSpeechRecognition?: typeof window.SpeechRecognition }).SpeechRecognition ||
-      (window as Window & { SpeechRecognition?: typeof window.SpeechRecognition; webkitSpeechRecognition?: typeof window.SpeechRecognition }).webkitSpeechRecognition
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any
+    const SpeechRecognition = w.SpeechRecognition || w.webkitSpeechRecognition
 
     if (!SpeechRecognition) return
     setIsSupported(true)
@@ -34,7 +34,8 @@ export function useSpeechRecognition(): SpeechRecognitionState {
     recognition.interimResults = true
     recognition.lang = 'fr-FR'
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
       let interim = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
