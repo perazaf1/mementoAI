@@ -12,6 +12,23 @@ npm run lint     # ESLint check
 
 No test suite is set up. The app requires Chrome or Edge to use the Web Speech API.
 
+## Current State (as of last session)
+
+The app is **live in production** at `https://memento-ai-delta.vercel.app`.
+
+What is fully built and deployed:
+- Auth (email+password + Google OAuth, password reset flow)
+- Supabase DB with session limits per plan
+- Lemon Squeezy payment (checkout + webhook)
+- Responsive design (mobile + desktop)
+- Security hardening (RLS, headers, CSP)
+
+What remains to build:
+- `SUPABASE_SERVICE_ROLE_KEY` + `supabaseAdmin` client for the webhook route (currently uses publishable key)
+- Atomic session consumption via SQL function `try_consume_session` (race condition fix)
+- Custom SMTP for transactional emails (currently email confirmations are disabled in Supabase)
+- Lemon Squeezy payment UI on landing page (Pro CTA button points to `/app`, not checkout)
+
 ## Architecture
 
 **Routes:**
@@ -39,6 +56,7 @@ No test suite is set up. The app requires Chrome or Edge to use the Web Speech A
 Supabase clients:
 - `utils/supabase/server.ts` — server-side (API routes, Server Components).
 - `utils/supabase/client.ts` — browser-side (Client Components).
+- `utils/supabase/admin.ts` — NOT YET CREATED. Should use `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS. Needed for the webhook route.
 
 ## Translations — two separate systems
 
@@ -65,6 +83,12 @@ recitations(id, user_id, mode, course_text, transcript, feedback, created_at)
 ```
 
 Plans: `'free'` | `'pro'` | `'isep'`
+
+**RLS policies (migration 002 applied):**
+- `users_select_own` — SELECT only own row
+- `users_update_sessions_only` — UPDATE own row but WITH CHECK prevents changing `plan`
+- `recitations_select_own` — SELECT only own recitations
+- `recitations_insert_own` — INSERT only for own user_id
 
 A Postgres trigger (`handle_new_user`) auto-creates a `users` row on signup and sets `plan = 'isep'` if email ends with `@eleve.isep.fr`.
 
@@ -97,16 +121,18 @@ Limits are enforced both client-side (`components/InputScreen.tsx`) and server-s
 - Pro variant ID: `1614994` (8€/mois)
 - ISEP variant ID: `1614998` (5€/mois)
 - Checkout flow: client calls `POST /api/checkout` → server creates checkout via LS API → returns URL → client redirects.
+- Webhook URL (prod): `https://memento-ai-delta.vercel.app/api/webhooks/lemonsqueezy`
 - Webhook: `POST /api/webhooks/lemonsqueezy` — verifies `x-signature` (HMAC SHA256), handles `subscription_created` and `subscription_updated`, updates `users.plan`.
 - After successful payment, user is redirected to `/app?upgraded=1` which shows a success banner.
+- ⚠️ The webhook currently uses the publishable Supabase key (not service role). Should be migrated to `supabaseAdmin` to bypass RLS safely.
 
 ## Speech Recognition
 
-`hooks/useSpeechRecognition.ts` wraps the browser Web Speech API. Key detail: `getFullTranscript()` reads `finalRef.current` synchronously — use this instead of the `transcript` state when stopping, because React state updates are asynchronous and the value may lag behind. Language is fixed to `fr-FR` in the hook.
+`hooks/useSpeechRecognition.ts` wraps the browser Web Speech API. Key detail: `getFullTranscript()` reads `finalRef.current` synchronously — use this instead of the `transcript` state when stopping, because React state updates are asynchronous and the value may lag behind. Language is fixed to `fr-FR` in the hook. Browser types (`SpeechRecognition`, `SpeechRecognitionEvent`) are cast via `any` to avoid TypeScript errors in the Vercel build environment.
 
 ## Responsive Design
 
-`hooks/useIsMobile.ts` — returns `true` if viewport ≤ 640px. Used in `AppShell` to adapt the header layout. CSS utility classes `.hide-mobile` / `.show-mobile` are defined in `globals.css` and used on the landing page. Breakpoint: 640px.
+`hooks/useIsMobile.ts` — returns `true` if viewport ≤ 640px. Used in `AppShell` to adapt the header layout (single row on mobile with a progress bar below, full header on desktop). CSS utility classes `.hide-mobile` / `.show-mobile` are defined in `globals.css` and used on the landing page. Breakpoint: 640px.
 
 ## Styling Conventions
 
@@ -123,6 +149,19 @@ The app uses **inline styles** (not CSS modules or Tailwind component classes) f
 
 Fonts: `Cormorant` (serif, headings) and `DM Sans` (body), loaded via Google Fonts in `globals.css`. The landing page hero uses `#0C1420` as its dark background (not a CSS variable).
 
+## Security
+
+Applied hardening (all in production):
+- **RLS** — `users_update_sessions_only` prevents users from self-upgrading their plan (migration `002_fix_rls.sql`)
+- **Security headers** — X-Frame-Options, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP (in `next.config.js`)
+- **CSP** — whitelists `*.supabase.co`, `fonts.googleapis.com`, `fonts.gstatic.com`, `*.lemonsqueezy.com`, `api.anthropic.com`
+- **Webhook signature** — HMAC SHA256 verified on every Lemon Squeezy webhook
+- **No error detail leakage** — API routes return generic error messages to the client
+
+Remaining security tasks:
+- Add `SUPABASE_SERVICE_ROLE_KEY` + `supabaseAdmin` for the webhook route
+- Replace session increment logic in `/api/feedback` with atomic SQL function `try_consume_session` (prevents race condition on simultaneous requests)
+
 ## Environment Variables
 
 All secrets are server-side only except Supabase public keys.
@@ -131,8 +170,9 @@ All secrets are server-side only except Supabase public keys.
 ANTHROPIC_API_KEY                    # Claude API
 NEXT_PUBLIC_SUPABASE_URL             # Supabase project URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY # Supabase anon/publishable key
+SUPABASE_SERVICE_ROLE_KEY            # NOT YET ADDED — needed for webhook + admin ops
 LEMONSQUEEZY_API_KEY                 # Lemon Squeezy API key
-LEMONSQUEEZY_WEBHOOK_SECRET          # Lemon Squeezy webhook signing secret
+LEMONSQUEEZY_WEBHOOK_SECRET          # Lemon Squeezy webhook signing secret (regenerated)
 LEMONSQUEEZY_STORE_ID                # 365953
 LEMONSQUEEZY_PRO_VARIANT_ID          # 1614994
 LEMONSQUEEZY_ISEP_VARIANT_ID         # 1614998
@@ -142,6 +182,8 @@ Never import Anthropic or Lemon Squeezy clients in client components. Supabase b
 
 ## Deployment
 
-Hosted on Vercel. Each push to `main` triggers an automatic redeploy. After deploying:
-- Add production URL to Supabase → Authentication → URL Configuration (Site URL + Redirect URLs).
-- Set Lemon Squeezy webhook URL to `https://<domain>/api/webhooks/lemonsqueezy`.
+- **Production URL**: `https://memento-ai-delta.vercel.app`
+- Hosted on Vercel. Each push to `main` triggers an automatic redeploy.
+- **Supabase redirect URLs configured**: `/auth/callback` and `/auth/update-password`
+- **Lemon Squeezy webhook configured** pointing to production URL
+- Email confirmations are **disabled** in Supabase (re-enable once custom SMTP is set up)
