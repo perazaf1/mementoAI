@@ -19,6 +19,7 @@ The app is **live in production** at `https://memento-ai-delta.vercel.app`.
 What is fully built and deployed:
 - Auth (email+password + Google OAuth, password reset flow)
 - Signup redirects directly to `/app` — no email confirmation (confirmations disabled in Supabase, will stay disabled)
+- Logged-in users redirected to `/app` from `/` and `/auth/*` (middleware)
 - Supabase DB with session limits per plan
 - Lemon Squeezy payment (checkout + webhook) — Pro and ISEP CTAs on landing page wired to checkout
 - Responsive design (mobile + desktop)
@@ -28,6 +29,8 @@ What is fully built and deployed:
 - Onboarding modal on first `/app` visit (stored in `localStorage` key `memento_onboarded`)
 - SEO meta tags + Open Graph in `app/layout.tsx`
 - Vercel Analytics (`@vercel/analytics`) active in production
+- AI disclaimer at bottom of feedback screen (SVG icon, no emojis)
+- Custom favicon (replaced in `public/`)
 
 Nothing critical remains to build. Optional future work:
 - Custom SMTP for transactional emails (password reset currently uses Supabase default SMTP)
