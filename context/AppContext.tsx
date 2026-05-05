@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { type UILang, getT, type TranslationKey } from '@/lib/i18n'
 
 export type AppMode = 'course' | 'code'
@@ -21,6 +21,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [uiLang, setUiLang] = useState<UILang>('fr')
   const [feedbackLang, setFeedbackLang] = useState('auto')
   const [mode, setMode] = useState<AppMode>('course')
+
+  // Load saved language preference on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('uiLang')
+    if (saved === 'en' || saved === 'fr') setUiLang(saved)
+  }, [])
 
   const t = getT(uiLang)
 

@@ -73,9 +73,12 @@ const STEP_ICONS = [
 
 export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
   const [visible, setVisible] = useState(false)
-  const t = COPY[lang]
+  const [resolvedLang, setResolvedLang] = useState<'fr' | 'en'>(lang)
+  const t = COPY[resolvedLang]
 
   useEffect(() => {
+    const saved = localStorage.getItem('uiLang')
+    if (saved === 'en' || saved === 'fr') setResolvedLang(saved)
     if (!localStorage.getItem(STORAGE_KEY)) {
       setVisible(true)
     }

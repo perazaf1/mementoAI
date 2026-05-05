@@ -298,7 +298,7 @@ function AppShell() {
         {/* Lang switcher */}
         <div style={{ display: 'flex', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border)', flexShrink: 0 }}>
           {(['fr', 'en'] as UILang[]).map((lang) => (
-            <button key={lang} onClick={() => setUiLang(lang)} style={{
+            <button key={lang} onClick={() => { setUiLang(lang); localStorage.setItem('uiLang', lang) }} style={{
               padding: '3px 8px', fontSize: '11px',
               fontWeight: uiLang === lang ? 600 : 400,
               background: uiLang === lang ? 'var(--accent)' : 'transparent',
