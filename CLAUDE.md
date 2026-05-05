@@ -54,6 +54,7 @@ Nothing critical remains to build. Optional future work:
 `middleware.ts` (root) calls `utils/supabase/middleware.ts` on every request:
 - `/app/*` — requires auth, redirects to `/auth/login` if not authenticated.
 - `/auth/*` — redirects to `/app` if already authenticated (except `/auth/update-password`).
+- `/` — redirects to `/app` if already authenticated (handles post-OAuth landing on root).
 - Sessions are refreshed automatically via cookie on every request.
 
 Supabase clients:
