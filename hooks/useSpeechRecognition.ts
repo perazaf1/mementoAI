@@ -17,7 +17,7 @@ export function useSpeechRecognition(): SpeechRecognitionState {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [interimTranscript, setInterimTranscript] = useState('')
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<InstanceType<typeof window.SpeechRecognition> | null>(null)
   const finalRef = useRef('')
 
   useEffect(() => {
