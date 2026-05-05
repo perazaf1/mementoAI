@@ -184,7 +184,7 @@ export default function LoginPage() {
           {(['login', 'signup'] as AuthMode[]).map((m) => (
             <button
               key={m}
-              onClick={() => { setAuthMode(m); setError(''); setSuccessMsg('') }}
+              onClick={() => { setAuthMode(m); setError('') }}
               style={{
                 flex: 1,
                 padding: '6px',
