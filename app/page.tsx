@@ -12,6 +12,7 @@ const COPY = {
     // Nav
     login: 'Se connecter',
     startFree: 'Commencer gratuitement',
+    startFreeMobile: 'Essayer',
 
     // Hero
     badge: 'Disponible gratuitement',
@@ -76,6 +77,7 @@ const COPY = {
     // Nav
     login: 'Log in',
     startFree: 'Start for free',
+    startFreeMobile: 'Try it',
 
     // Hero
     badge: 'Free to use',
@@ -235,8 +237,6 @@ function Nav({ t, lang, setLang }: { t: typeof COPY.fr; lang: Lang; setLang: (l:
 
       <div style={{ flex: 1 }} />
 
-      <LangToggle lang={lang} setLang={setLang} dark />
-
       <Link href="/app" className="hide-mobile" style={{
         fontSize: '13px', color: 'rgba(240,237,232,0.65)', textDecoration: 'none', padding: '6px 12px', transition: 'color 0.15s ease',
       }}
@@ -245,16 +245,21 @@ function Nav({ t, lang, setLang }: { t: typeof COPY.fr; lang: Lang; setLang: (l:
       >
         {t.login}
       </Link>
+
+      {/* CTA — texte court sur mobile, complet sur desktop */}
       <Link href="/app" style={{
         fontSize: '13px', fontWeight: 500, background: '#F0EDE8', color: '#0C1420',
-        padding: '7px 18px', borderRadius: '6px', textDecoration: 'none', transition: 'opacity 0.15s ease',
-        whiteSpace: 'nowrap',
+        padding: '7px 14px', borderRadius: '6px', textDecoration: 'none',
+        transition: 'opacity 0.15s ease', whiteSpace: 'nowrap', flexShrink: 0,
       }}
         onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
         onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
       >
-        {t.startFree}
+        <span className="hide-mobile">{t.startFree}</span>
+        <span className="show-mobile">{t.startFreeMobile}</span>
       </Link>
+
+      <LangToggle lang={lang} setLang={setLang} dark />
     </nav>
   )
 }
