@@ -186,6 +186,33 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   )
 }
 
+/* ─── Checkout helper ────────────────────────────────────────────────── */
+function useCheckout() {
+  const [loading, setLoading] = useState<'pro' | 'isep' | null>(null)
+
+  const startCheckout = async (plan: 'pro' | 'isep') => {
+    setLoading(plan)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      })
+      if (res.status === 401) {
+        // Not logged in — send to login, then back to pricing
+        window.location.href = '/auth/login'
+        return
+      }
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  return { startCheckout, loading }
+}
+
 /* ─── Lang switcher (shared UI) ──────────────────────────────────────── */
 function LangToggle({ lang, setLang, dark }: { lang: Lang; setLang: (l: Lang) => void; dark?: boolean }) {
   const base = dark
@@ -572,7 +599,12 @@ function Features({ t }: { t: typeof COPY.fr }) {
 }
 
 /* ─── Pricing ────────────────────────────────────────────────────────── */
-function Pricing({ t }: { t: typeof COPY.fr }) {
+function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoading }: {
+  t: typeof COPY.fr
+  onProCheckout: () => void
+  onIsepCheckout: () => void
+  checkoutLoading: 'pro' | 'isep' | null
+}) {
   return (
     <section className="lp-section" style={{ background: 'var(--bg)', padding: '120px 24px', borderTop: '1px solid var(--border)' }}>
       <div style={{ maxWidth: '840px', margin: '0 auto' }}>
@@ -685,16 +717,22 @@ function Pricing({ t }: { t: typeof COPY.fr }) {
                     </div>
                   ))}
                 </div>
-                <Link href="/app" style={{
-                  display: 'block', textAlign: 'center', padding: '11px',
-                  background: '#F0EDE8', borderRadius: '8px',
-                  fontSize: '14px', fontWeight: 600, color: '#0C1420', textDecoration: 'none', transition: 'opacity 0.15s ease',
-                }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                <button
+                  onClick={onProCheckout}
+                  disabled={checkoutLoading === 'pro'}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'center', padding: '11px',
+                    background: '#F0EDE8', borderRadius: '8px', border: 'none',
+                    fontSize: '14px', fontWeight: 600, color: '#0C1420',
+                    cursor: checkoutLoading === 'pro' ? 'not-allowed' : 'pointer',
+                    opacity: checkoutLoading === 'pro' ? 0.7 : 1,
+                    transition: 'opacity 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '0.9' }}
+                  onMouseLeave={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '1' }}
                 >
-                  {t.proCta}
-                </Link>
+                  {checkoutLoading === 'pro' ? '...' : t.proCta}
+                </button>
               </div>
             </div>
           </Reveal>
@@ -720,16 +758,21 @@ function Pricing({ t }: { t: typeof COPY.fr }) {
             <p style={{ fontSize: '14px', color: 'var(--muted)', flex: 1, lineHeight: 1.6 }}>
               {t.isepNote}
             </p>
-            <Link href="/app" style={{
-              fontSize: '13px', fontWeight: 500, color: 'var(--accent)',
-              textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-              transition: 'opacity 0.15s ease',
-            }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+            <button
+              onClick={onIsepCheckout}
+              disabled={checkoutLoading === 'isep'}
+              style={{
+                fontSize: '13px', fontWeight: 500, color: 'var(--accent)',
+                background: 'none', border: 'none', cursor: checkoutLoading === 'isep' ? 'not-allowed' : 'pointer',
+                whiteSpace: 'nowrap', flexShrink: 0, padding: 0,
+                opacity: checkoutLoading === 'isep' ? 0.6 : 1,
+                transition: 'opacity 0.15s ease',
+              }}
+              onMouseEnter={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '0.7' }}
+              onMouseLeave={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '1' }}
             >
-              {t.isepCta}
-            </Link>
+              {checkoutLoading === 'isep' ? '...' : t.isepCta}
+            </button>
           </div>
         </Reveal>
       </div>
@@ -837,6 +880,7 @@ function Footer({ t }: { t: typeof COPY.fr }) {
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>('fr')
   const t = COPY[lang]
+  const { startCheckout, loading: checkoutLoading } = useCheckout()
 
   return (
     <>
@@ -862,7 +906,12 @@ export default function LandingPage() {
       <Hero t={t} lang={lang} />
       <HowItWorks t={t} />
       <Features t={t} />
-      <Pricing t={t} />
+      <Pricing
+        t={t}
+        onProCheckout={() => startCheckout('pro')}
+        onIsepCheckout={() => startCheckout('isep')}
+        checkoutLoading={checkoutLoading}
+      />
       <Footer t={t} />
     </>
   )

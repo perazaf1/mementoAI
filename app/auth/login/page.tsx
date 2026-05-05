@@ -24,7 +24,6 @@ const COPY = {
     loading_login: 'Connexion...',
     loading_signup: 'Création...',
     isep_note: 'Les étudiants ISEP (@eleve.isep.fr) bénéficient automatiquement du plan ISEP.',
-    success: 'Vérifie ta boîte mail pour confirmer ton compte.',
   },
   en: {
     login: 'Sign in',
@@ -41,7 +40,6 @@ const COPY = {
     loading_login: 'Signing in...',
     loading_signup: 'Creating...',
     isep_note: 'ISEP students (@eleve.isep.fr) automatically get the ISEP plan.',
-    success: 'Check your inbox to confirm your account.',
   },
 }
 
