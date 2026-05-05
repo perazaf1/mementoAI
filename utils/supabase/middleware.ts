@@ -31,10 +31,17 @@ export const updateSession = async (request: NextRequest) => {
     return NextResponse.redirect(url)
   }
 
-  // Redirect logged-in users away from auth pages
+  // Redirect logged-in users away from auth pages and landing page
   // Exception: /auth/update-password must stay accessible to set the new password
   const isUpdatePassword = request.nextUrl.pathname === '/auth/update-password'
   if (user && request.nextUrl.pathname.startsWith('/auth') && !isUpdatePassword) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/app'
+    return NextResponse.redirect(url)
+  }
+
+  // Redirect logged-in users from landing page directly to /app
+  if (user && request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone()
     url.pathname = '/app'
     return NextResponse.redirect(url)
