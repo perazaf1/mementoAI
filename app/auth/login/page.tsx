@@ -56,7 +56,6 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
 
   const c = COPY[lang]
 
@@ -73,14 +72,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setSuccessMsg('')
     setLoading(true)
 
     try {
       if (authMode === 'signup') {
         const { error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
-        setSuccessMsg(c.success)
+        router.push('/app')
+        router.refresh()
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
@@ -278,9 +277,6 @@ export default function LoginPage() {
 
           {error && (
             <p style={{ fontSize: '13px', color: 'var(--red)', margin: 0 }}>{error}</p>
-          )}
-          {successMsg && (
-            <p style={{ fontSize: '13px', color: 'var(--green)', margin: 0 }}>{successMsg}</p>
           )}
 
           <button
