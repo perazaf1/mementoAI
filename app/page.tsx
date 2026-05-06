@@ -1,7 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Nav, Hero, HowItWorks, Features, Pricing, Footer, COPY, type Lang } from '@/components/landing'
+import dynamic from 'next/dynamic'
+import { Nav, Hero, COPY, type Lang } from '@/components/landing'
+
+const HowItWorks = dynamic(() => import('@/components/landing/HowItWorks'), { ssr: true })
+const Features = dynamic(() => import('@/components/landing/Features'), { ssr: true })
+const Pricing = dynamic(() => import('@/components/landing/Pricing'), { ssr: true })
+const Footer = dynamic(() => import('@/components/landing/Footer'), { ssr: true })
 
 function useCheckout() {
   const [loading, setLoading] = useState<'pro' | 'isep' | null>(null)
@@ -35,24 +41,6 @@ export default function LandingPage() {
 
   return (
     <>
-      <style>{`
-        @keyframes lp-pulse-ring {
-          0%   { transform: scale(1);   opacity: 0.6; }
-          70%  { transform: scale(2.4); opacity: 0;   }
-          100% { transform: scale(2.4); opacity: 0;   }
-        }
-        @keyframes lp-pulse-dot {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.55; }
-        }
-        @media (max-width: 640px) {
-          .lp-mock { transform: none !important; margin-top: 48px !important; }
-          .lp-hero-text { text-align: left !important; }
-          .lp-hero-ctas { justify-content: flex-start !important; }
-          .lp-section { padding: 72px 16px !important; }
-          .lp-footer-center { display: none !important; }
-        }
-      `}</style>
       <Nav t={t} lang={lang} setLang={setLang} />
       <Hero t={t} lang={lang} />
       <HowItWorks t={t} />

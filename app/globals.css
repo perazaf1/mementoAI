@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap');
+/* Fonts loaded via next/font in layout.tsx — no @import needed */
 
 :root {
   --bg: #F6F4EF;
@@ -40,12 +40,15 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Make 'Cormorant' and 'DM Sans' references resolve to next/font loaded faces */
+  --heading-font: var(--font-cormorant), Georgia, serif;
+  --body-font: var(--font-dm-sans), system-ui, sans-serif;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
   font-size: 15px;
   line-height: 1.6;
   min-height: 100vh;
@@ -82,6 +85,26 @@ body {
 
 .animate-fade-up {
   animation: fade-up 0.4s ease forwards;
+}
+
+/* ── Landing page animations ─────────────────────────────── */
+@keyframes lp-pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { transform: scale(2.4); opacity: 0;   }
+  100% { transform: scale(2.4); opacity: 0;   }
+}
+@keyframes lp-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+/* ── Landing page mobile overrides ───────────────────────── */
+@media (max-width: 640px) {
+  .lp-mock { transform: none !important; margin-top: 48px !important; }
+  .lp-hero-text { text-align: left !important; }
+  .lp-hero-ctas { justify-content: flex-start !important; }
+  .lp-section { padding: 72px 16px !important; }
+  .lp-footer-center { display: none !important; }
 }
 
 /* ── Responsive utilities ────────────────────────────────── */

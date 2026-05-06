@@ -86,7 +86,7 @@ export default function HistoryPage() {
         gap: '16px',
       }}>
         <Link href="/" style={{
-          fontFamily: 'Cormorant, serif',
+          fontFamily: 'var(--heading-font)',
           fontSize: '21px',
           fontWeight: 600,
           letterSpacing: '-0.02em',
@@ -111,7 +111,7 @@ export default function HistoryPage() {
 
       <main style={{ flex: 1, maxWidth: '720px', margin: '0 auto', width: '100%', padding: 'clamp(28px, 5vw, 48px) clamp(14px, 4vw, 24px) 80px' }}>
         <h1 style={{
-          fontFamily: 'Cormorant, serif',
+          fontFamily: 'var(--heading-font)',
           fontSize: '28px',
           fontWeight: 600,
           color: 'var(--text)',

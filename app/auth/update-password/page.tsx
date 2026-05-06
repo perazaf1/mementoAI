@@ -96,7 +96,7 @@ export default function UpdatePasswordPage() {
       </div>
 
       <Link href="/" style={{
-        fontFamily: 'Cormorant, serif', fontSize: '26px', fontWeight: 600,
+        fontFamily: 'var(--heading-font)', fontSize: '26px', fontWeight: 600,
         letterSpacing: '-0.02em', color: 'var(--text)', textDecoration: 'none',
         marginBottom: '32px', display: 'block',
       }}>
@@ -108,7 +108,7 @@ export default function UpdatePasswordPage() {
         borderRadius: '14px', padding: '32px', width: '100%', maxWidth: '380px',
       }}>
         <h1 style={{
-          fontFamily: 'Cormorant, serif', fontSize: '24px', fontWeight: 500,
+          fontFamily: 'var(--heading-font)', fontSize: '24px', fontWeight: 500,
           color: 'var(--text)', marginBottom: '8px', letterSpacing: '-0.01em',
         }}>
           {c.title}

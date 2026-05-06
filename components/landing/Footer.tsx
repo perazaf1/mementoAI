@@ -20,7 +20,7 @@ export default function Footer({ t }: { t: CopyType }) {
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px',
     }}>
       {/* Left — logo */}
-      <span style={{ fontFamily: 'Cormorant, serif', fontSize: '20px', fontWeight: 600, color: '#F0EDE8', letterSpacing: '-0.02em' }}>
+      <span style={{ fontFamily: 'var(--heading-font)', fontSize: '20px', fontWeight: 600, color: '#F0EDE8', letterSpacing: '-0.02em' }}>
         Memento
       </span>
 

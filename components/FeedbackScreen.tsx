@@ -156,7 +156,7 @@ export default function FeedbackScreen({
       {/* Page title */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{
-          fontFamily: 'Cormorant, serif', fontSize: '36px', fontWeight: 500,
+          fontFamily: 'var(--heading-font)', fontSize: '36px', fontWeight: 500,
           lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: '8px',
         }}>
           {t('resultsTitle')}

@@ -47,7 +47,7 @@ export default function Hero({ t, lang }: { t: CopyType; lang: Lang }) {
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: 'Cormorant, serif', fontSize: 'clamp(52px, 8vw, 88px)',
+          fontFamily: 'var(--heading-font)', fontSize: 'clamp(52px, 8vw, 88px)',
           fontWeight: 500, lineHeight: 1.05, letterSpacing: '-0.03em', color: '#F0EDE8', marginBottom: '28px',
         }}>
           {t.h1a}
@@ -58,7 +58,7 @@ export default function Hero({ t, lang }: { t: CopyType; lang: Lang }) {
         {/* Sub */}
         <p style={{
           fontSize: 'clamp(15px, 2vw, 18px)', color: 'rgba(240,237,232,0.55)',
-          lineHeight: 1.7, maxWidth: '520px', margin: '0 auto 44px', fontFamily: 'DM Sans, sans-serif',
+          lineHeight: 1.7, maxWidth: '520px', margin: '0 auto 44px', fontFamily: 'var(--body-font)',
         }}>
           {t.sub}
         </p>
@@ -118,7 +118,7 @@ export default function Hero({ t, lang }: { t: CopyType; lang: Lang }) {
           background: 'var(--bg)', borderRadius: '0 0 12px 12px',
           padding: '24px 24px 20px', border: '1px solid rgba(255,255,255,0.06)', borderTop: 'none',
         }}>
-          <p style={{ fontFamily: 'Cormorant, serif', fontSize: '24px', fontWeight: 500, color: 'var(--text)', letterSpacing: '-0.02em' }}>
+          <p style={{ fontFamily: 'var(--heading-font)', fontSize: '24px', fontWeight: 500, color: 'var(--text)', letterSpacing: '-0.02em' }}>
             {t.mockTitle}
           </p>
           <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px', marginBottom: '16px' }}>

@@ -202,7 +202,7 @@ function AppShell() {
       }}>
         {/* Logo */}
         <Link href="/" style={{
-          fontFamily: 'Cormorant, serif', fontSize: '21px', fontWeight: 600,
+          fontFamily: 'var(--heading-font)', fontSize: '21px', fontWeight: 600,
           letterSpacing: '-0.02em', color: 'var(--text)', textDecoration: 'none', flexShrink: 0,
         }}>
           Memento

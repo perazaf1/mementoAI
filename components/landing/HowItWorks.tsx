@@ -43,7 +43,7 @@ export default function HowItWorks({ t }: { t: CopyType }) {
             <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '14px' }}>
               {t.methodLabel}
             </p>
-            <h2 style={{ fontFamily: 'Cormorant, serif', fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: 'var(--heading-font)', fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1.15 }}>
               {t.methodH}
               <br />
               <span style={{ color: 'var(--muted)' }}>{t.methodHSub}</span>
@@ -72,12 +72,12 @@ export default function HowItWorks({ t }: { t: CopyType }) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
-                  <span style={{ fontFamily: 'Cormorant, serif', fontSize: '52px', fontWeight: 300, letterSpacing: '-0.03em', color: 'var(--border)', lineHeight: 1 }}>
+                  <span style={{ fontFamily: 'var(--heading-font)', fontSize: '52px', fontWeight: 300, letterSpacing: '-0.03em', color: 'var(--border)', lineHeight: 1 }}>
                     {step.n}
                   </span>
                   <div style={{ color: 'var(--accent)', marginTop: '4px' }}>{step.icon}</div>
                 </div>
-                <h3 style={{ fontFamily: 'Cormorant, serif', fontSize: '22px', fontWeight: 500, color: 'var(--text)', marginBottom: '10px', letterSpacing: '-0.01em' }}>
+                <h3 style={{ fontFamily: 'var(--heading-font)', fontSize: '22px', fontWeight: 500, color: 'var(--text)', marginBottom: '10px', letterSpacing: '-0.01em' }}>
                   {step.title}
                 </h3>
                 <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.7 }}>{step.desc}</p>

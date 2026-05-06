@@ -1,6 +1,22 @@
 import type { Metadata } from 'next'
+import { Cormorant, DM_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
+
+const cormorant = Cormorant({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-cormorant',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-dm-sans',
+})
 
 export const metadata: Metadata = {
   title: 'Memento — Récite. Retiens.',
@@ -32,9 +48,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${cormorant.variable} ${dmSans.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://va.vercel-scripts.com" />
+      </head>
       <body>
-        {children}
+        <main>
+          {children}
+        </main>
         <Analytics />
       </body>
     </html>

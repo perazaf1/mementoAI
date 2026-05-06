@@ -18,7 +18,7 @@ export default function Features({ t }: { t: CopyType }) {
             <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '14px' }}>
               {t.featLabel}
             </p>
-            <h2 style={{ fontFamily: 'Cormorant, serif', fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: 'var(--heading-font)', fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1.15 }}>
               {t.featH}
               <br />
               <span style={{ color: 'var(--muted)' }}>{t.featHSub}</span>
@@ -51,7 +51,7 @@ export default function Features({ t }: { t: CopyType }) {
                 }}>
                   {f.tag}
                 </div>
-                <h3 style={{ fontFamily: 'Cormorant, serif', fontSize: '24px', fontWeight: 500, color: 'var(--text)', marginBottom: '12px', letterSpacing: '-0.01em' }}>
+                <h3 style={{ fontFamily: 'var(--heading-font)', fontSize: '24px', fontWeight: 500, color: 'var(--text)', marginBottom: '12px', letterSpacing: '-0.01em' }}>
                   {f.title}
                 </h3>
                 <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.7 }}>{f.desc}</p>

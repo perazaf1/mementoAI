@@ -18,7 +18,7 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
             <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '14px' }}>
               {t.pricingLabel}
             </p>
-            <h2 style={{ fontFamily: 'Cormorant, serif', fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: 'var(--heading-font)', fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--text)', lineHeight: 1.15 }}>
               {t.pricingH}
               <br />
               <span style={{ color: 'var(--muted)' }}>{t.pricingHSub}</span>
@@ -48,7 +48,7 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
                 {t.freePlan}
               </p>
               <div style={{ marginBottom: '28px' }}>
-                <span style={{ fontFamily: 'Cormorant, serif', fontSize: '52px', fontWeight: 500, color: 'var(--text)', letterSpacing: '-0.03em' }}>0€</span>
+                <span style={{ fontFamily: 'var(--heading-font)', fontSize: '52px', fontWeight: 500, color: 'var(--text)', letterSpacing: '-0.03em' }}>0€</span>
                 <span style={{ fontSize: '14px', color: 'var(--muted)', marginLeft: '4px' }}>{t.perMonth}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
@@ -107,7 +107,7 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
                   </span>
                 </div>
                 <div style={{ marginBottom: '28px' }}>
-                  <span style={{ fontFamily: 'Cormorant, serif', fontSize: '52px', fontWeight: 500, color: '#F0EDE8', letterSpacing: '-0.03em' }}>8€</span>
+                  <span style={{ fontFamily: 'var(--heading-font)', fontSize: '52px', fontWeight: 500, color: '#F0EDE8', letterSpacing: '-0.03em' }}>8€</span>
                   <span style={{ fontSize: '14px', color: 'rgba(240,237,232,0.4)', marginLeft: '4px' }}>{t.perMonth}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>

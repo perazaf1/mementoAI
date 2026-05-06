@@ -60,7 +60,7 @@ export default function InputScreen({ courseText, onCourseChange, onBegin, userP
       <div style={{ marginBottom: '28px' }}>
         <h1
           style={{
-            fontFamily: 'Cormorant, serif',
+            fontFamily: 'var(--heading-font)',
             fontSize: '36px',
             fontWeight: 500,
             lineHeight: 1.15,
@@ -117,7 +117,7 @@ export default function InputScreen({ courseText, onCourseChange, onBegin, userP
             border: 'none',
             resize: 'none',
             outline: 'none',
-            fontFamily: isCodeMode ? "'DM Mono', 'Fira Code', 'Courier New', monospace" : 'DM Sans, sans-serif',
+            fontFamily: isCodeMode ? "'DM Mono', 'Fira Code', 'Courier New', monospace" : 'var(--body-font)',
             display: 'block',
           }}
           spellCheck={!isCodeMode}

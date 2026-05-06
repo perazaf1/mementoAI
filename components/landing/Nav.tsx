@@ -23,7 +23,7 @@ export default function Nav({ t, lang, setLang }: { t: CopyType; lang: Lang; set
       transition: 'all 0.3s ease',
     }}>
       <span
-        style={{ fontFamily: 'Cormorant, serif', fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', color: '#F0EDE8', cursor: 'default', transition: 'text-shadow 0.2s ease' }}
+        style={{ fontFamily: 'var(--heading-font)', fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', color: '#F0EDE8', cursor: 'default', transition: 'text-shadow 0.2s ease' }}
         onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.textShadow = '0 0 24px rgba(240,237,232,0.35)')}
         onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.textShadow = 'none')}
       >

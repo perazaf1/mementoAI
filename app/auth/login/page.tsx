@@ -150,7 +150,7 @@ export default function LoginPage() {
       </div>
 
       <Link href="/" style={{
-        fontFamily: 'Cormorant, serif',
+        fontFamily: 'var(--heading-font)',
         fontSize: '26px',
         fontWeight: 600,
         letterSpacing: '-0.02em',

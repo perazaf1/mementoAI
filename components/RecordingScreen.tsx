@@ -67,7 +67,7 @@ export default function RecordingScreen({ onStop, onCancel }: RecordingScreenPro
     return (
       <div className="animate-fade-up">
         <h1 style={{
-          fontFamily: 'Cormorant, serif', fontSize: '34px', fontWeight: 500,
+          fontFamily: 'var(--heading-font)', fontSize: '34px', fontWeight: 500,
           letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: '10px',
         }}>
           {t('browserUnsupportedTitle')}
@@ -92,7 +92,7 @@ export default function RecordingScreen({ onStop, onCancel }: RecordingScreenPro
       {/* Title */}
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{
-          fontFamily: 'Cormorant, serif', fontSize: '36px', fontWeight: 500,
+          fontFamily: 'var(--heading-font)', fontSize: '36px', fontWeight: 500,
           lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: '8px',
         }}>
           {isListening

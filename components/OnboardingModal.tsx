@@ -139,7 +139,7 @@ export default function OnboardingModal({ lang }: { lang: 'fr' | 'en' }) {
               </svg>
             </div>
             <h2 style={{
-              fontFamily: 'Cormorant, serif', fontSize: '24px', fontWeight: 600,
+              fontFamily: 'var(--heading-font)', fontSize: '24px', fontWeight: 600,
               color: 'var(--text)', margin: '0 0 6px', letterSpacing: '-0.01em',
             }}>
               {t.title}
