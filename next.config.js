@@ -2,14 +2,16 @@
 
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  script-src 'self' 'unsafe-inline';
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: blob:;
   connect-src 'self'
     https://*.supabase.co
     https://api.lemonsqueezy.com
-    https://api.anthropic.com;
+    https://api.anthropic.com
+    https://va.vercel-scripts.com;
+  script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com;
   frame-src https://*.lemonsqueezy.com https://mementoai-app.lemonsqueezy.com;
   frame-ancestors 'none';
 `.replace(/\n/g, ' ')

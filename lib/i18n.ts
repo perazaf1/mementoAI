@@ -86,6 +86,7 @@ const t = {
     errPdfType: 'Seuls les fichiers PDF sont acceptés.',
     errPdfExtract: "Impossible d'extraire le texte. Essaie de coller le contenu manuellement.",
     retry: 'Réessayer',
+    history: 'Historique',
   },
   en: {
     // Modes
@@ -158,6 +159,7 @@ const t = {
     errPdfType: 'Only PDF files are accepted.',
     errPdfExtract: 'Could not extract text. Try pasting the content manually.',
     retry: 'Retry',
+    history: 'History',
   },
 }
 

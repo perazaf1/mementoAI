@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+import { type UILang } from '@/lib/i18n'
 
 interface Recitation {
   id: string
@@ -13,13 +14,38 @@ interface Recitation {
   created_at: string
 }
 
-function formatDate(iso: string) {
+const COPY = {
+  fr: {
+    title: 'Historique',
+    subtitle: 'Tes 50 dernières récitations.',
+    back: "Retour à l'app",
+    loading: 'Chargement…',
+    empty: "Aucune récitation pour l'instant.",
+    startSession: 'Commencer une session',
+    transcript: 'Transcription',
+    feedback: 'Feedback',
+    course: 'Cours',
+  },
+  en: {
+    title: 'History',
+    subtitle: 'Your last 50 recitations.',
+    back: 'Back to app',
+    loading: 'Loading...',
+    empty: 'No recitations yet.',
+    startSession: 'Start a session',
+    transcript: 'Transcript',
+    feedback: 'Feedback',
+    course: 'Course',
+  },
+}
+
+function formatDate(iso: string, lang: UILang) {
   const d = new Date(iso)
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function truncate(str: string, n: number) {
-  return str.length > n ? str.slice(0, n) + '…' : str
+  return str.length > n ? str.slice(0, n) + '...' : str
 }
 
 export default function HistoryPage() {
@@ -27,8 +53,12 @@ export default function HistoryPage() {
   const [recitations, setRecitations] = useState<Recitation[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [lang, setLang] = useState<UILang>('fr')
 
   useEffect(() => {
+    const saved = localStorage.getItem('uiLang') as UILang | null
+    if (saved === 'en' || saved === 'fr') setLang(saved)
+
     const load = async () => {
       const { data } = await supabase
         .from('recitations')
@@ -41,6 +71,8 @@ export default function HistoryPage() {
     }
     load()
   }, [])
+
+  const c = COPY[lang]
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
@@ -73,7 +105,7 @@ export default function HistoryPage() {
           background: 'var(--accent-light)',
           fontWeight: 500,
         }}>
-          ← Retour à l'app
+          {c.back}
         </Link>
       </header>
 
@@ -85,14 +117,14 @@ export default function HistoryPage() {
           color: 'var(--text)',
           marginBottom: '8px',
         }}>
-          Historique
+          {c.title}
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '32px' }}>
-          Tes 50 dernières récitations.
+          {c.subtitle}
         </p>
 
         {loading && (
-          <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Chargement…</p>
+          <p style={{ color: 'var(--muted)', fontSize: '14px' }}>{c.loading}</p>
         )}
 
         {!loading && recitations.length === 0 && (
@@ -104,7 +136,7 @@ export default function HistoryPage() {
             border: '1px solid var(--border)',
           }}>
             <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '16px' }}>
-              Aucune récitation pour l'instant.
+              {c.empty}
             </p>
             <Link href="/app" style={{
               color: 'var(--accent)',
@@ -112,7 +144,7 @@ export default function HistoryPage() {
               textDecoration: 'none',
               fontWeight: 500,
             }}>
-              Commencer une session →
+              {c.startSession}
             </Link>
           </div>
         )}
@@ -155,7 +187,7 @@ export default function HistoryPage() {
                   padding: '2px 7px',
                   flexShrink: 0,
                 }}>
-                  {r.mode === 'code' ? 'Code' : 'Cours'}
+                  {r.mode === 'code' ? 'Code' : c.course}
                 </span>
 
                 <span style={{ fontSize: '13px', color: 'var(--text)', flex: 1, fontWeight: 500 }}>
@@ -163,12 +195,13 @@ export default function HistoryPage() {
                 </span>
 
                 <span style={{ fontSize: '12px', color: 'var(--muted)', flexShrink: 0 }}>
-                  {formatDate(r.created_at)}
+                  {formatDate(r.created_at, lang)}
                 </span>
 
-                <span style={{ fontSize: '12px', color: 'var(--muted)', flexShrink: 0 }}>
-                  {expanded === r.id ? '▲' : '▼'}
-                </span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ flexShrink: 0, transform: expanded === r.id ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
               </button>
 
               {/* Expanded content */}
@@ -182,7 +215,7 @@ export default function HistoryPage() {
                 }}>
                   <div>
                     <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-                      Transcription
+                      {c.transcript}
                     </p>
                     <p style={{ fontSize: '13px', color: 'var(--text)', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>
                       {r.transcript}
@@ -190,7 +223,7 @@ export default function HistoryPage() {
                   </div>
                   <div>
                     <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-                      Feedback
+                      {c.feedback}
                     </p>
                     <pre style={{
                       fontSize: '13px',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import ErrorBanner from './ErrorBanner'
 import { useApp } from '@/context/AppContext'
 
@@ -148,7 +148,7 @@ export default function FeedbackScreen({
 }: FeedbackScreenProps) {
   const { t, mode } = useApp()
   const [showTranscript, setShowTranscript] = useState(false)
-  const sections = feedback ? parseFeedback(feedback) : []
+  const sections = useMemo(() => feedback ? parseFeedback(feedback) : [], [feedback])
   const isCode = mode === 'code'
 
   return (

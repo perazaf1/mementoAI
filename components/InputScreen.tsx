@@ -224,7 +224,7 @@ export default function InputScreen({ courseText, onCourseChange, onBegin, userP
             onClick={onBegin}
             disabled={!canBegin}
             style={{
-              padding: '6px 18px',
+              padding: '8px 20px',
               borderRadius: '6px',
               fontSize: '13px',
               fontWeight: 500,

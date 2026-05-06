@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+const MAX_PDF_SIZE = 60 * 1024 * 1024 // 60 MB
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
@@ -7,6 +9,10 @@ export async function POST(req: NextRequest) {
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    if (file.size > MAX_PDF_SIZE) {
+      return NextResponse.json({ error: 'File too large (max 60 MB)' }, { status: 413 })
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())

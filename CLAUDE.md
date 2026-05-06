@@ -20,37 +20,55 @@ What is fully built and deployed:
 - Auth (email+password + Google OAuth, password reset flow)
 - Signup redirects directly to `/app` — no email confirmation (confirmations disabled in Supabase, will stay disabled)
 - Logged-in users redirected to `/app` from `/` and `/auth/*` (middleware)
+- Logout redirects to `/` (landing page) with `router.refresh()` to invalidate session
+- Multi-tab logout detection via `onAuthStateChange` listener in AppShell
 - Supabase DB with session limits per plan
 - Lemon Squeezy payment (checkout + webhook) — Pro and ISEP CTAs on landing page wired to checkout
 - Responsive design (mobile + desktop)
-- Security hardening (RLS, headers, CSP)
+- Security hardening (RLS, headers, CSP without `unsafe-eval`, rate limiting)
 - `supabaseAdmin` client (`utils/supabase/admin.ts`) using `SUPABASE_SERVICE_ROLE_KEY` — used by webhook and feedback routes
 - Atomic session consumption via SQL function `try_consume_session` (migration 003 applied)
+- Rate limiter (`lib/rate-limit.ts`) — in-memory sliding window, 10 req/min/user on `/api/feedback`
 - Onboarding modal on first `/app` visit (stored in `localStorage` key `memento_onboarded`)
 - SEO meta tags + Open Graph in `app/layout.tsx`
 - Vercel Analytics (`@vercel/analytics`) active in production
 - AI disclaimer at bottom of feedback screen (SVG icon, no emojis)
 - Custom favicon (replaced in `public/`)
+- PDF upload validation (max 60 MB server-side)
 
 Nothing critical remains to build. Optional future work:
 - Custom SMTP for transactional emails (password reset currently uses Supabase default SMTP)
+- Account deletion flow (GDPR)
+- ErrorBoundary wrapping AppShell
 
 ## Architecture
 
 **Routes:**
-- `/` — Landing page (`app/page.tsx`): hero, how it works, features, pricing. Self-contained with its own FR/EN translation object (`COPY`). No AppContext — lang state is local to `LandingPage`.
+- `/` — Landing page (`app/page.tsx`): assembler component (~70 lines). Section components live in `components/landing/`.
 - `/app` — The application (`app/app/page.tsx`): wrapped in `AppProvider`, manages the 3-step flow (input → recording → feedback). Requires auth — middleware redirects to `/auth/login` if not authenticated.
-- `/app/history` — Session history (`app/app/history/page.tsx`): last 50 recitations, expandable cards.
+- `/app/history` — Session history (`app/app/history/page.tsx`): last 50 recitations, expandable cards. Bilingual (FR/EN via local COPY object reading `uiLang` from localStorage).
 - `/auth/login` — Login/signup page with email+password and Google OAuth.
 - `/auth/reset-password` — Send password reset email.
 - `/auth/update-password` — Set new password (Supabase redirects here after reset link click).
 - `/auth/callback` — OAuth callback route.
-- `POST /api/feedback` — Calls Claude API. Uses `try_consume_session` RPC for atomic session check+increment. Saves recitation via `supabaseAdmin`. Accepts `{ courseText, transcript, feedbackLang, mode }`, returns `{ feedback, sessionsUsed, sessionsLimit }`.
-- `POST /api/extract-pdf` — Server-side PDF text extraction via `pdf-parse` (dynamic import required — see `next.config.js`).
+- `POST /api/feedback` — Calls Claude API. Rate-limited (10 req/min/user). Uses `try_consume_session` RPC for atomic session check+increment. Saves recitation via `supabaseAdmin`. Accepts `{ courseText, transcript, feedbackLang, mode }`, returns `{ feedback, sessionsUsed, sessionsLimit }`.
+- `POST /api/extract-pdf` — Server-side PDF text extraction via `pdf-parse` (dynamic import required — see `next.config.js`). Max file size: 60 MB.
 - `POST /api/checkout` — Creates a Lemon Squeezy checkout URL for Pro or ISEP plan upgrade. Returns 401 if not authenticated (client redirects to `/auth/login`).
 - `POST /api/webhooks/lemonsqueezy` — Receives `subscription_created` / `subscription_updated` events, verifies HMAC signature, updates `users.plan` via `supabaseAdmin`.
 
-**Core loop:** User logs in → onboarding modal (first time only) → inputs course text → records voice via Web Speech API → transcript + course text sent to `/api/feedback` → session limit checked atomically → Claude returns 4-section markdown → `FeedbackScreen` parses and renders it → recitation saved to DB.
+**Core loop:** User logs in → onboarding modal (first time only) → inputs course text → records voice via Web Speech API → transcript + course text sent to `/api/feedback` → rate limit checked → session limit checked atomically → Claude returns 4-section markdown → `FeedbackScreen` parses and renders it (memoized) → recitation saved to DB.
+
+**Landing page components** (`components/landing/`):
+- `types.ts` — `COPY`, `MOCK_CONTENT`, `Lang`, `CopyType` exports
+- `Nav.tsx` — Fixed navbar with scroll effect
+- `Hero.tsx` — Hero section with mock UI preview
+- `HowItWorks.tsx` — 3-step explanation cards
+- `Features.tsx` — Feature cards (Course mode, Code mode, Languages)
+- `Pricing.tsx` — Free vs Pro pricing cards + ISEP note
+- `Footer.tsx` — Footer with social links
+- `Reveal.tsx` — Scroll-triggered reveal animation wrapper
+- `LangToggle.tsx` — FR/EN language switcher button group
+- `index.ts` — Barrel export
 
 ## Auth & Middleware
 
@@ -65,6 +83,11 @@ Supabase clients:
 - `utils/supabase/client.ts` — browser-side (Client Components).
 - `utils/supabase/admin.ts` — lazy singleton using `SUPABASE_SERVICE_ROLE_KEY`, bypasses RLS. Used in `/api/feedback` and `/api/webhooks/lemonsqueezy`.
 
+**Logout behavior:**
+- `handleSignOut` in AppShell calls `supabase.auth.signOut()` then `router.push('/') + router.refresh()`
+- `onAuthStateChange` listener catches `SIGNED_OUT` events (covers multi-tab, expired sessions)
+- If `getUser()` returns null on mount, user is redirected to `/`
+
 **Deleting test users:** Always delete from Supabase dashboard → Authentication → Users (not from Table Editor). This removes both `auth.users` and `public.users`. Deleting only from `public.users` leaves the auth record and blocks re-signup with the same email.
 
 ## Translations — two separate systems
@@ -73,7 +96,9 @@ The project has **two independent translation systems** that must not be confuse
 
 1. **App UI** (`lib/i18n.ts`) — used inside `/app` via `AppContext`. Exports `getT(lang)`, `TranslationKey`, and `FEEDBACK_LANGUAGES`. Adding a string requires updating both `fr` and `en` objects. `feedbackLang` values are passed directly to Claude as English language names (e.g. `"French"`, `"Arabic"`).
 
-2. **Landing page** (`app/page.tsx`, top of file) — a standalone `COPY = { fr: {...}, en: {...} }` object. Lang state (`useState<Lang>`) lives in `LandingPage` and is passed as props to each section component. The mock feedback labels in the hero also translate via `MOCK_CONTENT[lang]`.
+2. **Landing page** (`components/landing/types.ts`) — a standalone `COPY = { fr: {...}, en: {...} }` object. Lang state (`useState<Lang>`) lives in `LandingPage` (`app/page.tsx`) and is passed as props to each section component. The mock feedback labels in the hero also translate via `MOCK_CONTENT[lang]`.
+
+3. **History page** (`app/app/history/page.tsx`) — local `COPY = { fr, en }` object, reads `uiLang` from `localStorage`.
 
 Auth pages (`/auth/*`) each have their own local `COPY = { fr, en }` object. Lang is stored in `localStorage` under key `uiLang`.
 
@@ -115,7 +140,11 @@ SELECT upgrade_to_pro('email@example.com');
 - `buildCoursePrompt(courseText, transcript, feedbackLang)` — instructs Claude to output exactly 4 markdown sections (`## Bien couvert`, `## Points manquants`, `## Imprécisions`, `## Conseil`). Language instruction is appended to the system prompt; `feedbackLang = 'auto'` tells Claude to detect from the transcript.
 - `buildCodePrompt(code, transcript)` — same 4-section structure in English only (`## Well covered`, `## Missing points`, `## Imprecisions`, `## Advice`), truncates code to 50 lines. Always responds in English.
 
-`FeedbackScreen` parses Claude's response by matching `## heading` lines against known section keys (multilingual-aware via `matchKeys` arrays).
+`FeedbackScreen` parses Claude's response by matching `## heading` lines against known section keys (multilingual-aware via `matchKeys` arrays). Parsing is memoized with `useMemo` on `feedback` prop.
+
+## Rate Limiting
+
+`lib/rate-limit.ts` — in-memory sliding-window rate limiter. Not globally consistent across Vercel instances (best-effort), but catches rapid-fire abuse effectively. Used in `/api/feedback`: max 10 requests per minute per authenticated user ID. Returns 429 if exceeded. This is separate from the daily session limit (which is enforced atomically in the DB).
 
 ## Input Limits
 
@@ -168,8 +197,10 @@ Applied hardening (all in production):
 - **RLS** — `users_update_sessions_only` prevents users from self-upgrading their plan (migration `002_fix_rls.sql`)
 - **supabaseAdmin** — service role client used for webhook and feedback routes, bypasses RLS safely
 - **Atomic sessions** — `try_consume_session` SQL function prevents race conditions (migration `003_try_consume_session.sql`)
+- **Rate limiting** — in-memory sliding window (10 req/min/user) on `/api/feedback` (`lib/rate-limit.ts`)
+- **PDF size validation** — max 60 MB enforced server-side in `/api/extract-pdf`
 - **Security headers** — X-Frame-Options, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP (in `next.config.js`)
-- **CSP** — whitelists `*.supabase.co`, `fonts.googleapis.com`, `fonts.gstatic.com`, `*.lemonsqueezy.com`, `api.anthropic.com`
+- **CSP** — `unsafe-eval` removed; whitelists `*.supabase.co`, `fonts.googleapis.com`, `fonts.gstatic.com`, `*.lemonsqueezy.com`, `api.anthropic.com`, `va.vercel-scripts.com`
 - **Webhook signature** — HMAC SHA256 verified on every Lemon Squeezy webhook
 - **No error detail leakage** — API routes return generic error messages to the client
 

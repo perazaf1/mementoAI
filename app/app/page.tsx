@@ -41,7 +41,10 @@ function AppShell() {
   useEffect(() => {
     const loadProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        router.push('/')
+        return
+      }
 
       const { data } = await supabase
         .from('users')
@@ -55,11 +58,20 @@ function AppShell() {
       }
     }
     loadProfile()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        router.push('/')
+        router.refresh()
+      }
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push('/auth/login')
+    router.push('/')
+    router.refresh()
   }
 
   const [upgradeError, setUpgradeError] = useState('')
@@ -177,11 +189,11 @@ function AppShell() {
       <header style={{
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface)',
-        padding: `0 ${isMobile ? '14px' : '28px'}`,
+        padding: `0 ${isMobile ? '10px' : '28px'}`,
         height: '54px',
         display: 'flex',
         alignItems: 'center',
-        gap: isMobile ? '8px' : '12px',
+        gap: isMobile ? '6px' : '12px',
         flexShrink: 0,
       }}>
         {/* Logo */}
@@ -273,7 +285,7 @@ function AppShell() {
             fontSize: '12px', color: 'var(--muted)', textDecoration: 'none',
             flexShrink: 0, whiteSpace: 'nowrap',
           }}>
-            Historique
+            {t('history')}
           </Link>
         )}
 
@@ -291,7 +303,7 @@ function AppShell() {
             onMouseEnter={(e) => { if (!upgradeLoading) { const el = e.currentTarget as HTMLElement; el.style.background = 'var(--accent)'; el.style.color = '#fff' } }}
             onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.background = 'var(--accent-light)'; el.style.color = 'var(--accent)' }}
           >
-            {upgradeLoading ? '...' : isMobile ? 'Pro' : '⬆ Passer Pro'}
+            {upgradeLoading ? '...' : isMobile ? 'Pro' : 'Passer Pro'}
           </button>
         )}
 
@@ -315,12 +327,15 @@ function AppShell() {
         <button onClick={handleSignOut} title="Déconnexion" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: '30px', height: '30px',
-          fontSize: '16px', color: 'var(--muted)',
+          color: 'var(--muted)',
           background: 'transparent', border: '1px solid var(--border)',
           borderRadius: '6px', cursor: 'pointer', flexShrink: 0,
-          lineHeight: 1,
         }}>
-          ↪
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
         </button>
       </header>
 

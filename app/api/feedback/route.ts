@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { buildCoursePrompt, buildCodePrompt } from '@/lib/claude'
 import { createClient } from '@/utils/supabase/server'
 import { supabaseAdmin } from '@/utils/supabase/admin'
+import { rateLimit } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic()
 
@@ -20,6 +21,12 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limit: max 10 requests per minute per user
+    const { allowed } = rateLimit(user.id, { maxRequests: 10, windowMs: 60_000 })
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
     }
 
     // Atomically consume a session (handles reset + limit check in one locked DB call)
