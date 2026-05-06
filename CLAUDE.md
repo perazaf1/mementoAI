@@ -35,6 +35,7 @@ What is fully built and deployed:
 - AI disclaimer at bottom of feedback screen (SVG icon, no emojis)
 - Custom favicon (replaced in `public/`)
 - PDF upload validation (max 60 MB server-side)
+- Performance optimizations: `next/font` self-hosted fonts, code splitting via `next/dynamic`, `<main>` landmark, preconnect hints
 
 Nothing critical remains to build. Optional future work:
 - Custom SMTP for transactional emails (password reset currently uses Supabase default SMTP)
@@ -44,7 +45,7 @@ Nothing critical remains to build. Optional future work:
 ## Architecture
 
 **Routes:**
-- `/` — Landing page (`app/page.tsx`): assembler component (~70 lines). Section components live in `components/landing/`.
+- `/` — Landing page (`app/page.tsx`): assembler component (~58 lines). `Nav` and `Hero` are eagerly loaded; `HowItWorks`, `Features`, `Pricing`, `Footer` are lazy-loaded via `next/dynamic` (SSR enabled). Section components live in `components/landing/`.
 - `/app` — The application (`app/app/page.tsx`): wrapped in `AppProvider`, manages the 3-step flow (input → recording → feedback). Requires auth — middleware redirects to `/auth/login` if not authenticated.
 - `/app/history` — Session history (`app/app/history/page.tsx`): last 50 recitations, expandable cards. Bilingual (FR/EN via local COPY object reading `uiLang` from localStorage).
 - `/auth/login` — Login/signup page with email+password and Google OAuth.
@@ -187,7 +188,13 @@ The app uses **inline styles** (not CSS modules or Tailwind component classes) f
 --blue/--blue-bg/--blue-border      (feedback: advice)
 ```
 
-Fonts: `Cormorant` (serif, headings) and `DM Sans` (body), loaded via Google Fonts in `globals.css`. The landing page hero uses `#0C1420` as its dark background (not a CSS variable).
+Fonts: `Cormorant` (serif, headings) and `DM Sans` (body), loaded via `next/font/google` in `app/layout.tsx` (self-hosted, no external Google Fonts requests). CSS variables `--font-cormorant` and `--font-dm-sans` are set on `<html>`. Two convenience aliases defined in `globals.css`:
+- `--heading-font` → `var(--font-cormorant), Georgia, serif`
+- `--body-font` → `var(--font-dm-sans), system-ui, sans-serif`
+
+All inline `fontFamily` references across components use `var(--heading-font)` or `var(--body-font)` — never hardcoded font names. The landing page hero uses `#0C1420` as its dark background (not a CSS variable).
+
+Landing page keyframe animations (`lp-pulse-ring`, `lp-pulse-dot`) and mobile overrides (`.lp-mock`, `.lp-hero-text`, etc.) live in `globals.css`, not inline `<style>` tags.
 
 **No emojis in UI.** Always use SVG icons that match the design tokens. The user dislikes emojis in components.
 
@@ -200,7 +207,7 @@ Applied hardening (all in production):
 - **Rate limiting** — in-memory sliding window (10 req/min/user) on `/api/feedback` (`lib/rate-limit.ts`)
 - **PDF size validation** — max 60 MB enforced server-side in `/api/extract-pdf`
 - **Security headers** — X-Frame-Options, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP (in `next.config.js`)
-- **CSP** — `unsafe-eval` removed; whitelists `*.supabase.co`, `fonts.googleapis.com`, `fonts.gstatic.com`, `*.lemonsqueezy.com`, `api.anthropic.com`, `va.vercel-scripts.com`
+- **CSP** — `unsafe-eval` removed; whitelists `*.supabase.co`, `*.lemonsqueezy.com`, `api.anthropic.com`, `va.vercel-scripts.com` (Google Fonts origins removed — fonts are self-hosted via `next/font`)
 - **Webhook signature** — HMAC SHA256 verified on every Lemon Squeezy webhook
 - **No error detail leakage** — API routes return generic error messages to the client
 
@@ -221,6 +228,19 @@ LEMONSQUEEZY_ISEP_VARIANT_ID         # 1614998
 ```
 
 Never import Anthropic or Lemon Squeezy clients in client components. Supabase browser client (`utils/supabase/client.ts`) is the only external SDK allowed client-side.
+
+## Performance
+
+Optimizations applied for PageSpeed / Core Web Vitals:
+
+- **Font loading** — `next/font/google` in `layout.tsx` self-hosts Cormorant and DM Sans. Eliminates render-blocking `@import` to Google Fonts. Fonts are served from `/_next/static` (same origin, zero extra DNS lookups).
+- **Code splitting** — Below-fold landing page components (`HowItWorks`, `Features`, `Pricing`, `Footer`) are lazy-loaded via `next/dynamic({ ssr: true })`. Reduces initial JS payload while preserving SSR HTML.
+- **Semantic HTML** — `<main>` landmark wraps all page content in `layout.tsx`. Required for accessibility (screen readers).
+- **Preconnect** — `<link rel="preconnect" href="https://va.vercel-scripts.com" />` in `layout.tsx` for Vercel Analytics.
+- **No inline `<style>` blocks** — All keyframes and media queries live in `globals.css`, processed by PostCSS at build time.
+- **CSP tightened** — `fonts.googleapis.com` and `fonts.gstatic.com` removed from CSP since fonts are now self-hosted.
+
+When adding new landing page sections: use `next/dynamic` for anything below the fold. Keep `Nav` and `Hero` eagerly loaded (above-the-fold / LCP).
 
 ## Deployment
 
