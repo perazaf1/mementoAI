@@ -12,7 +12,17 @@ Voici le cours de référence :
 ${courseText}
 ---
 
-Évalue la récitation en structurant ta réponse avec exactement ces 4 titres de section en markdown :
+IMPORTANT : Commence TOUJOURS ta réponse par une ligne de score au format exact suivant :
+Score: X/10
+
+Règles de notation (sois réaliste et cohérent) :
+- 9-10 : récitation excellente, quasi parfaite, tous les points clés couverts avec précision
+- 7-8 : solide mais quelques oublis ou imprécisions mineures
+- 5-6 : moyen, des points importants manquent ou sont imprécis
+- Moins de 5 : performance faible, contenu très incomplet ou erroné
+- Si l'input est vide, incohérent ou incompréhensible, donne un score de 0/10
+
+Puis structure le reste de ta réponse avec exactement ces 4 titres de section en markdown :
 
 ## Bien couvert
 
@@ -22,7 +32,7 @@ ${courseText}
 
 ## Conseil
 
-Pour chaque section, rédige 2 à 5 points concis. Utilise des listes à tiret simples (-) pour les points multiples. Pas d'emojis. Sois précis, bienveillant et concis. Tutoie l'élève. Ne réécris pas le cours entier.
+Pour chaque section, rédige 2 à 5 points concis. Utilise des listes à tiret simples (-) pour les points multiples. Pas d'emojis. Pas de sous-titres markdown (pas de ###). Sois précis, bienveillant et concis. Tutoie l'élève. Ne réécris pas le cours entier.
 
 ${langInstruction}`
 
@@ -42,7 +52,17 @@ Here is the reference code (first ${MAX_CODE_LINES} lines):
 ${lines}
 ---
 
-Evaluate the student's explanation using exactly these 4 markdown section headers:
+IMPORTANT: Always start your response with a score line in this exact format:
+Score: X/10
+
+Scoring rules (be realistic and consistent):
+- 9-10: excellent explanation, near perfect, all key concepts covered accurately
+- 7-8: solid but some gaps or minor inaccuracies
+- 5-6: average, important points missing or imprecise
+- Below 5: weak performance, very incomplete or incorrect
+- If the input is empty, incoherent, or incomprehensible, give a score of 0/10
+
+Then structure the rest of your response using exactly these 4 markdown section headers:
 
 ## Well covered
 
@@ -52,7 +72,7 @@ Evaluate the student's explanation using exactly these 4 markdown section header
 
 ## Advice
 
-For each section, write 2 to 5 concise points. Use simple dash lists (-) for multiple points. No emojis. Be precise, supportive, and concise. Address the student directly. Do not rewrite the code entirely. Respond entirely in English.`
+For each section, write 2 to 5 concise points. Use simple dash lists (-) for multiple points. No emojis. No sub-headings (no ###). Be precise, supportive, and concise. Address the student directly. Do not rewrite the code entirely. Respond entirely in English.`
 
   return {
     system,

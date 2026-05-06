@@ -59,12 +59,31 @@ const SECTION_DEFS: Omit<Section, 'content'>[] = [
   },
 ]
 
+function parseScore(raw: string): number | null {
+  const match = raw.match(/^Score\s*:\s*(\d+(?:\.\d+)?)\s*\/\s*10/im)
+  if (!match) return null
+  const score = parseFloat(match[1])
+  if (isNaN(score) || score < 0 || score > 10) return null
+  return score
+}
+
+function getScoreColor(score: number): string {
+  if (score >= 7) return 'var(--green)'
+  if (score >= 5) return 'var(--orange)'
+  return 'var(--red)'
+}
+
+function getScoreBg(score: number): string {
+  if (score >= 7) return 'var(--green-bg)'
+  if (score >= 5) return 'var(--orange-bg)'
+  return 'var(--red-bg)'
+}
+
 function parseFeedback(raw: string): Section[] {
   const sections: Section[] = []
   let current: Section | null = null
 
   for (const line of raw.split('\n')) {
-    // Match markdown headings: ## Some Title
     const headingMatch = line.match(/^#+\s*(.+)/)
     if (headingMatch) {
       const headingText = headingMatch[1].trim().toLowerCase()
@@ -83,7 +102,6 @@ function parseFeedback(raw: string): Section[] {
   }
   if (current) sections.push(current)
 
-  // Fallback: unknown format
   if (sections.length === 0) {
     return [{
       key: 'raw',
@@ -109,7 +127,6 @@ function renderContent(raw: string) {
         const isBullet = /^[-*]\s/.test(line.trim())
         const text = isBullet ? line.replace(/^[-*]\s+/, '') : line
 
-        // Render **bold**
         const parts = text.split(/\*\*(.*?)\*\*/g)
         const rendered = parts.map((part, j) =>
           j % 2 === 1
@@ -137,6 +154,94 @@ function renderContent(raw: string) {
   )
 }
 
+/* ── Score Ring SVG ──────────────────────────────────────── */
+
+function ScoreRing({ score }: { score: number }) {
+  const { t } = useApp()
+  const size = 120
+  const strokeWidth = 8
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const progress = score / 10
+  const offset = circumference * (1 - progress)
+  const color = getScoreColor(score)
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '8px',
+    }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg
+          width={size}
+          height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          style={{ transform: 'rotate(-90deg)' }}
+        >
+          {/* Background track */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="var(--border)"
+            strokeWidth={strokeWidth}
+          />
+          {/* Filled arc */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            style={{
+              '--score-ring-circumference': `${circumference}`,
+              '--score-ring-offset': `${offset}`,
+              animation: 'score-ring-fill 1s ease-out forwards',
+            } as React.CSSProperties}
+          />
+        </svg>
+        {/* Score number */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'score-number-in 0.6s ease-out 0.3s both',
+        }}>
+          <span style={{
+            fontFamily: 'var(--heading-font)',
+            fontSize: '32px',
+            fontWeight: 700,
+            lineHeight: 1,
+            color,
+          }}>
+            {score % 1 === 0 ? score.toFixed(0) : score.toFixed(1)}
+          </span>
+          <span style={{
+            fontSize: '12px',
+            color: 'var(--muted)',
+            fontWeight: 500,
+            marginTop: '2px',
+          }}>
+            {t('scoreOutOf')}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Main Component ──────────────────────────────────────── */
+
 export default function FeedbackScreen({
   transcript,
   feedback,
@@ -149,6 +254,7 @@ export default function FeedbackScreen({
   const { t, mode } = useApp()
   const [showTranscript, setShowTranscript] = useState(false)
   const sections = useMemo(() => feedback ? parseFeedback(feedback) : [], [feedback])
+  const score = useMemo(() => feedback ? parseScore(feedback) : null, [feedback])
   const isCode = mode === 'code'
 
   return (
@@ -190,9 +296,26 @@ export default function FeedbackScreen({
         <ErrorBanner message={error} onRetry={onRetryFeedback} />
       )}
 
-      {/* 4 Sections */}
+      {/* Score + Sections */}
       {!isLoading && !error && sections.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+          {/* Score card */}
+          {score !== null && (
+            <div style={{
+              background: getScoreBg(score),
+              border: `1px solid var(--border)`,
+              borderRadius: '12px',
+              padding: '28px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <ScoreRing score={score} />
+            </div>
+          )}
+
+          {/* 4 Sections */}
           {sections.map((section) => (
             <div
               key={section.key}

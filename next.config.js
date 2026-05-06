@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 
+const isDev = process.env.NODE_ENV === 'development'
+
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline';
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''};
   style-src 'self' 'unsafe-inline';
   font-src 'self';
   img-src 'self' data: blob:;
@@ -10,8 +12,8 @@ const ContentSecurityPolicy = `
     https://*.supabase.co
     https://api.lemonsqueezy.com
     https://api.anthropic.com
-    https://va.vercel-scripts.com;
-  script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com;
+    https://va.vercel-scripts.com${isDev ? ' ws://localhost:3000' : ''};
+  script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ''};
   frame-src https://*.lemonsqueezy.com https://mementoai-app.lemonsqueezy.com;
   frame-ancestors 'none';
 `.replace(/\n/g, ' ')
