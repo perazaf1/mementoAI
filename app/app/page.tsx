@@ -144,7 +144,11 @@ function AppShell() {
       if (res.status === 429) {
         const data = await res.json()
         const limit = PLAN_LIMITS[data.plan] ?? 3
-        setFeedbackError(`Tu as atteint ta limite de ${limit} sessions aujourd'hui. Reviens demain !`)
+        setFeedbackError(
+          uiLang === 'fr'
+            ? `Tu as atteint ta limite de ${limit} sessions. Réessaie dans 12 heures.`
+            : `You've reached your limit of ${limit} sessions. Try again in 12 hours.`
+        )
         return
       }
 
@@ -370,8 +374,8 @@ function AppShell() {
             </p>
             <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.75)' }}>
               {profile?.plan === 'isep'
-                ? '10 sessions par jour et 25 000 caractères sont maintenant disponibles.'
-                : '20 sessions par jour, mode code et 11 langues sont maintenant disponibles.'}
+                ? '10 sessions / 12h et 25 000 caractères sont maintenant disponibles.'
+                : '20 sessions / 12h, mode code et 11 langues sont maintenant disponibles.'}
             </p>
           </div>
           <button onClick={() => setShowUpgradedBanner(false)} style={{

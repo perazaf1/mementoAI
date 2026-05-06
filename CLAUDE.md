@@ -126,8 +126,8 @@ Plans: `'free'` | `'pro'` | `'isep'`
 
 A Postgres trigger (`handle_new_user`) auto-creates a `users` row on signup and sets `plan = 'isep'` if email ends with `@eleve.isep.fr`.
 
-**Atomic session function (migration 003 applied):**
-`try_consume_session(p_user_id UUID)` — locks the row, resets counter if new day, checks limit, increments. Returns `'ok'` | `'limit_reached'` | `'user_not_found'`. Called via `supabaseAdmin.rpc(...)` in `/api/feedback`.
+**Atomic session function (migration 004 applied — replaces 003):**
+`try_consume_session(p_user_id UUID)` — locks the row, resets counter if 12 hours have passed since `last_reset_date`, checks limit, increments. Returns `'ok'` | `'limit_reached'` | `'user_not_found'`. Called via `supabaseAdmin.rpc(...)` in `/api/feedback`. The `last_reset_date` column is `TIMESTAMPTZ` (not `DATE`).
 
 To manually upgrade a user to Pro, run in Supabase SQL Editor:
 ```sql
@@ -148,7 +148,7 @@ SELECT upgrade_to_pro('email@example.com');
 
 ## Input Limits
 
-| Plan | Course mode | Code mode | Sessions/day |
+| Plan | Course mode | Code mode | Sessions/12h |
 |---|---|---|---|
 | Free | 15,000 chars | 50 lines | 3 |
 | Pro | 25,000 chars | 50 lines | 20 |
