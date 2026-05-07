@@ -191,13 +191,15 @@ The app uses **inline styles** (not CSS modules or Tailwind component classes) f
 --blue/--blue-bg/--blue-border      (feedback: advice)
 ```
 
-Fonts: `Cormorant` (serif, headings) and `DM Sans` (body), loaded via `next/font/google` in `app/layout.tsx` (self-hosted, no external Google Fonts requests). CSS variables `--font-cormorant` and `--font-dm-sans` are set on `<html>`. Two convenience aliases defined in `globals.css`:
+Fonts: `Cormorant` (serif, headings — weights 300, 500, 600, no italic) and `DM Sans` (body — weights 400, 500, 600), loaded via `next/font/google` in `app/layout.tsx` (self-hosted, no external Google Fonts requests). CSS variables `--font-cormorant` and `--font-dm-sans` are set on `<html>`. Two convenience aliases defined in `globals.css`:
 - `--heading-font` → `var(--font-cormorant), Georgia, serif`
 - `--body-font` → `var(--font-dm-sans), system-ui, sans-serif`
 
 All inline `fontFamily` references across components use `var(--heading-font)` or `var(--body-font)` — never hardcoded font names. The landing page hero uses `#0C1420` as its dark background (not a CSS variable).
 
 Landing page keyframe animations (`lp-pulse-ring`, `lp-pulse-dot`) and mobile overrides (`.lp-mock`, `.lp-hero-text`, etc.) live in `globals.css`, not inline `<style>` tags.
+
+**Landing page hover states** are handled via CSS classes in `globals.css` (not JS `onMouseEnter`/`onMouseLeave` handlers). Key classes: `lp-card-step`, `lp-card-feature`, `lp-card-free`, `lp-card-pro`, `lp-cta-primary`, `lp-cta-ghost`, `lp-cta-free-link`, `lp-hover-opacity`, `lp-hover-light`, `lp-nav-logo`, `lp-icon-link`. When adding new landing page interactive elements, always use CSS `:hover` classes — never JS hover handlers.
 
 **No emojis in UI.** Always use SVG icons that match the design tokens. The user dislikes emojis in components.
 
@@ -236,14 +238,18 @@ Never import Anthropic or Lemon Squeezy clients in client components. Supabase b
 
 Optimizations applied for PageSpeed / Core Web Vitals:
 
-- **Font loading** — `next/font/google` in `layout.tsx` self-hosts Cormorant and DM Sans. Eliminates render-blocking `@import` to Google Fonts. Fonts are served from `/_next/static` (same origin, zero extra DNS lookups).
+- **Font loading** — `next/font/google` in `layout.tsx` self-hosts Cormorant (weights 300/500/600 only) and DM Sans. No italic variants loaded (Hero `<em>` uses browser faux-italic). Fonts are served from `/_next/static` (same origin, zero extra DNS lookups).
 - **Code splitting** — Below-fold landing page components (`HowItWorks`, `Features`, `Pricing`, `Footer`) are lazy-loaded via `next/dynamic({ ssr: true })`. Reduces initial JS payload while preserving SSR HTML.
+- **CSS-only hover states** — All landing page hover effects use CSS classes (`lp-card-step:hover`, etc.) in `globals.css` instead of JS `onMouseEnter`/`onMouseLeave` handlers. Eliminates ~30 event listeners and forced style recalculations during hydration.
+- **`box-shadow` over `filter: drop-shadow`** — Hero mock UI uses `boxShadow` instead of `filter: drop-shadow(...)`. `filter` forces expensive offscreen compositing; `box-shadow` is GPU-accelerated natively. Major LCP improvement.
+- **Browserslist** — `package.json` targets last 2 versions of modern browsers. Eliminates polyfills for `Array.prototype.at`, `Object.hasOwn`, etc. (~12KB saved).
+- **Passive scroll listener** — Nav scroll handler uses `{ passive: true }` to avoid blocking the main thread.
 - **Semantic HTML** — `<main>` landmark wraps all page content in `layout.tsx`. Required for accessibility (screen readers).
 - **Preconnect** — `<link rel="preconnect" href="https://va.vercel-scripts.com" />` in `layout.tsx` for Vercel Analytics.
 - **No inline `<style>` blocks** — All keyframes and media queries live in `globals.css`, processed by PostCSS at build time.
 - **CSP tightened** — `fonts.googleapis.com` and `fonts.gstatic.com` removed from CSP since fonts are now self-hosted.
 
-When adding new landing page sections: use `next/dynamic` for anything below the fold. Keep `Nav` and `Hero` eagerly loaded (above-the-fold / LCP).
+When adding new landing page sections: use `next/dynamic` for anything below the fold. Keep `Nav` and `Hero` eagerly loaded (above-the-fold / LCP). Use CSS hover classes, not JS handlers.
 
 ## Deployment
 
