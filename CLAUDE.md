@@ -36,6 +36,7 @@ What is fully built and deployed:
 - Custom favicon (replaced in `public/`)
 - PDF upload validation (max 60 MB server-side)
 - Performance optimizations: `next/font` self-hosted fonts, code splitting via `next/dynamic`, `<main>` landmark, preconnect hints
+- README.md with project overview, setup instructions, and architecture summary
 
 Nothing critical remains to build. Optional future work:
 - Custom SMTP for transactional emails (password reset currently uses Supabase default SMTP)
@@ -129,6 +130,8 @@ A Postgres trigger (`handle_new_user`) auto-creates a `users` row on signup and 
 
 **Atomic session function (migration 004 applied — replaces 003):**
 `try_consume_session(p_user_id UUID)` — locks the row, resets counter if 12 hours have passed since `last_reset_date`, checks limit, increments. Returns `'ok'` | `'limit_reached'` | `'user_not_found'`. Called via `supabaseAdmin.rpc(...)` in `/api/feedback`. The `last_reset_date` column is `TIMESTAMPTZ` (not `DATE`).
+
+**Session counter display fix:** `AppShell.loadProfile` fetches `last_reset_date` alongside `sessions_today` and computes the effective count client-side (shows 0 if 12h have elapsed since last reset). This keeps the UI in sync with the SQL reset logic that only fires on the next `try_consume_session` call.
 
 To manually upgrade a user to Pro, run in Supabase SQL Editor:
 ```sql
