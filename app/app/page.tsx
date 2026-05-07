@@ -48,13 +48,19 @@ function AppShell() {
 
       const { data } = await supabase
         .from('users')
-        .select('plan, sessions_today')
+        .select('plan, sessions_today, last_reset_date')
         .eq('id', user.id)
         .single()
 
       if (data) {
-        setProfile({ email: user.email ?? '', plan: data.plan, sessions_today: data.sessions_today })
-        setSessionsUsed(data.sessions_today)
+        // If 12h have passed since last reset, the counter will be reset on next API call
+        // Show 0 now so the UI stays consistent
+        const effectiveSessions = data.last_reset_date
+          && (Date.now() - new Date(data.last_reset_date).getTime()) >= 12 * 60 * 60 * 1000
+          ? 0
+          : data.sessions_today
+        setProfile({ email: user.email ?? '', plan: data.plan, sessions_today: effectiveSessions })
+        setSessionsUsed(effectiveSessions)
       }
     }
     loadProfile()
