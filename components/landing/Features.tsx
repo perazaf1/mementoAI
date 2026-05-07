@@ -29,21 +29,7 @@ export default function Features({ t }: { t: CopyType }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 100}>
-              <div
-                style={{ padding: '32px', borderRadius: '12px', border: '1px solid transparent', transition: 'border-color 0.2s ease, background 0.2s ease, transform 0.2s ease' }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.borderColor = 'rgba(26,56,128,0.18)'
-                  el.style.background = 'var(--bg)'
-                  el.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.borderColor = 'transparent'
-                  el.style.background = 'transparent'
-                  el.style.transform = 'translateY(0)'
-                }}
-              >
+              <div className="lp-card-feature" style={{ padding: '32px', borderRadius: '12px' }}>
                 <div style={{
                   display: 'inline-block', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em',
                   textTransform: 'uppercase', color: 'var(--accent)', background: 'var(--accent-light)',

@@ -18,6 +18,12 @@
     "react": "^18",
     "react-dom": "^18"
   },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ],
   "devDependencies": {
     "@types/node": "^20",
     "@types/pdf-parse": "^1.1.4",

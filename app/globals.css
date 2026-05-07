@@ -98,6 +98,72 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* ── Landing page CSS hover states (replaces JS handlers) ── */
+.lp-card-step {
+  border: 1px solid var(--border);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.lp-card-step:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.07);
+  border-color: rgba(26,56,128,0.25);
+  transform: translateY(-2px);
+}
+
+.lp-card-feature {
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.lp-card-feature:hover {
+  border-color: rgba(26,56,128,0.18);
+  background: var(--bg);
+  transform: translateY(-2px);
+}
+
+.lp-card-free {
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.lp-card-free:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.07);
+  border-color: rgba(26,56,128,0.2);
+}
+
+.lp-card-pro {
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.lp-card-pro:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(26,56,128,0.25);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.lp-cta-primary { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.lp-cta-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+.lp-cta-ghost { transition: border-color 0.15s ease, color 0.15s ease; }
+.lp-cta-ghost:hover { border-color: rgba(240,237,232,0.4); color: #F0EDE8; }
+
+.lp-cta-free-link { transition: all 0.15s ease; }
+.lp-cta-free-link:hover { border-color: var(--accent); color: var(--accent); }
+
+.lp-hover-opacity { transition: opacity 0.15s ease; }
+.lp-hover-opacity:hover { opacity: 0.9; }
+
+.lp-nav-logo { transition: text-shadow 0.2s ease; }
+.lp-nav-logo:hover { text-shadow: 0 0 24px rgba(240,237,232,0.35); }
+
+.lp-hover-light { transition: color 0.15s ease; }
+.lp-hover-light:hover { color: #F0EDE8; }
+
+.lp-icon-link { transition: all 0.15s ease; }
+.lp-icon-link:hover {
+  border-color: rgba(240,237,232,0.35);
+  color: #F0EDE8;
+  background: rgba(240,237,232,0.06);
+}
+
 /* ── Landing page animations ─────────────────────────────── */
 @keyframes lp-pulse-ring {
   0%   { transform: scale(1);   opacity: 0.6; }

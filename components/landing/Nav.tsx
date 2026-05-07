@@ -9,7 +9,7 @@ export default function Nav({ t, lang, setLang }: { t: CopyType; lang: Lang; set
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', fn)
+    window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
@@ -23,32 +23,25 @@ export default function Nav({ t, lang, setLang }: { t: CopyType; lang: Lang; set
       transition: 'all 0.3s ease',
     }}>
       <span
-        style={{ fontFamily: 'var(--heading-font)', fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', color: '#F0EDE8', cursor: 'default', transition: 'text-shadow 0.2s ease' }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.textShadow = '0 0 24px rgba(240,237,232,0.35)')}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.textShadow = 'none')}
+        className="lp-nav-logo"
+        style={{ fontFamily: 'var(--heading-font)', fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', color: '#F0EDE8', cursor: 'default' }}
       >
         Memento
       </span>
 
       <div style={{ flex: 1 }} />
 
-      <Link href="/app" className="hide-mobile" style={{
-        fontSize: '13px', color: 'rgba(240,237,232,0.65)', textDecoration: 'none', padding: '6px 12px', transition: 'color 0.15s ease',
-      }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = '#F0EDE8')}
-        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(240,237,232,0.65)')}
-      >
+      <Link href="/app" className="hide-mobile lp-hover-light" style={{
+        fontSize: '13px', color: 'rgba(240,237,232,0.65)', textDecoration: 'none', padding: '6px 12px',
+      }}>
         {t.login}
       </Link>
 
-      <Link href="/app" style={{
+      <Link href="/app" className="lp-hover-opacity" style={{
         fontSize: '13px', fontWeight: 500, background: '#F0EDE8', color: '#0C1420',
         padding: '7px 14px', borderRadius: '6px', textDecoration: 'none',
-        transition: 'opacity 0.15s ease', whiteSpace: 'nowrap', flexShrink: 0,
-      }}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-      >
+        whiteSpace: 'nowrap', flexShrink: 0,
+      }}>
         <span className="hide-mobile">{t.startFree}</span>
         <span className="show-mobile">{t.startFreeMobile}</span>
       </Link>

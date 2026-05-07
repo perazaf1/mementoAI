@@ -29,21 +29,9 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'start' }}>
           {/* Free */}
           <Reveal delay={0}>
-            <div
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '36px', transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease' }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement
-                el.style.transform = 'translateY(-3px)'
-                el.style.boxShadow = '0 12px 36px rgba(0,0,0,0.07)'
-                el.style.borderColor = 'rgba(26,56,128,0.2)'
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement
-                el.style.transform = 'translateY(0)'
-                el.style.boxShadow = 'none'
-                el.style.borderColor = 'var(--border)'
-              }}
-            >
+            <div className="lp-card-free" style={{
+              background: 'var(--surface)', borderRadius: '16px', padding: '36px',
+            }}>
               <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 {t.freePlan}
               </p>
@@ -63,14 +51,11 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
                   </div>
                 ))}
               </div>
-              <Link href="/app" style={{
+              <Link href="/app" className="lp-cta-free-link" style={{
                 display: 'block', textAlign: 'center', padding: '11px',
                 border: '1px solid var(--border)', borderRadius: '8px',
-                fontSize: '14px', fontWeight: 500, color: 'var(--text)', textDecoration: 'none', transition: 'all 0.15s ease',
-              }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text)' }}
-              >
+                fontSize: '14px', fontWeight: 500, color: 'var(--text)', textDecoration: 'none',
+              }}>
                 {t.freeCta}
               </Link>
             </div>
@@ -78,21 +63,10 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
 
           {/* Pro */}
           <Reveal delay={120}>
-            <div
-              style={{ background: '#0C1420', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '36px', position: 'relative', overflow: 'hidden', transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease' }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement
-                el.style.transform = 'translateY(-3px)'
-                el.style.boxShadow = '0 16px 48px rgba(26,56,128,0.25)'
-                el.style.borderColor = 'rgba(255,255,255,0.15)'
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement
-                el.style.transform = 'translateY(0)'
-                el.style.boxShadow = 'none'
-                el.style.borderColor = 'rgba(255,255,255,0.08)'
-              }}
-            >
+            <div className="lp-card-pro" style={{
+              background: '#0C1420', borderRadius: '16px', padding: '36px',
+              position: 'relative', overflow: 'hidden',
+            }}>
               <div style={{
                 position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px',
                 background: 'radial-gradient(ellipse, rgba(26,56,128,0.4) 0%, transparent 70%)', pointerEvents: 'none',
@@ -125,16 +99,14 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
                 <button
                   onClick={onProCheckout}
                   disabled={checkoutLoading === 'pro'}
+                  className="lp-hover-opacity"
                   style={{
                     display: 'block', width: '100%', textAlign: 'center', padding: '11px',
                     background: '#F0EDE8', borderRadius: '8px', border: 'none',
                     fontSize: '14px', fontWeight: 600, color: '#0C1420',
                     cursor: checkoutLoading === 'pro' ? 'not-allowed' : 'pointer',
                     opacity: checkoutLoading === 'pro' ? 0.7 : 1,
-                    transition: 'opacity 0.15s ease',
                   }}
-                  onMouseEnter={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '0.9' }}
-                  onMouseLeave={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '1' }}
                 >
                   {checkoutLoading === 'pro' ? '...' : t.proCta}
                 </button>
@@ -166,15 +138,13 @@ export default function Pricing({ t, onProCheckout, onIsepCheckout, checkoutLoad
             <button
               onClick={onIsepCheckout}
               disabled={checkoutLoading === 'isep'}
+              className="lp-hover-opacity"
               style={{
                 fontSize: '13px', fontWeight: 500, color: 'var(--accent)',
                 background: 'none', border: 'none', cursor: checkoutLoading === 'isep' ? 'not-allowed' : 'pointer',
                 whiteSpace: 'nowrap', flexShrink: 0, padding: 0,
                 opacity: checkoutLoading === 'isep' ? 0.6 : 1,
-                transition: 'opacity 0.15s ease',
               }}
-              onMouseEnter={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '0.7' }}
-              onMouseLeave={(e) => { if (!checkoutLoading) (e.currentTarget as HTMLElement).style.opacity = '1' }}
             >
               {checkoutLoading === 'isep' ? '...' : t.isepCta}
             </button>

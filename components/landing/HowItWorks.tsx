@@ -54,23 +54,10 @@ export default function HowItWorks({ t }: { t: CopyType }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '28px' }}>
           {steps.map((step, i) => (
             <Reveal key={step.n} delay={i * 110}>
-              <div style={{
-                background: 'var(--surface)', border: '1px solid var(--border)',
-                borderRadius: '12px', padding: '32px', transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease',
-              }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07)'
-                  el.style.borderColor = 'rgba(26,56,128,0.25)'
-                  el.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement
-                  el.style.boxShadow = 'none'
-                  el.style.borderColor = 'var(--border)'
-                  el.style.transform = 'translateY(0)'
-                }}
-              >
+              <div className="lp-card-step" style={{
+                background: 'var(--surface)',
+                borderRadius: '12px', padding: '32px',
+              }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <span style={{ fontFamily: 'var(--heading-font)', fontSize: '52px', fontWeight: 300, letterSpacing: '-0.03em', color: 'var(--border)', lineHeight: 1 }}>
                     {step.n}

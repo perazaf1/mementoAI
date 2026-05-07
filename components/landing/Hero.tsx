@@ -65,38 +65,33 @@ export default function Hero({ t, lang }: { t: CopyType; lang: Lang }) {
 
         {/* CTAs */}
         <div className="lp-hero-ctas" style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/app" style={{
+          <Link href="/app" className="lp-cta-primary" style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             background: '#F0EDE8', color: '#0C1420', padding: '12px 28px', borderRadius: '8px',
-            fontSize: '15px', fontWeight: 600, textDecoration: 'none', transition: 'all 0.15s ease', letterSpacing: '0.01em',
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
-          >
+            fontSize: '15px', fontWeight: 600, textDecoration: 'none', letterSpacing: '0.01em',
+          }}>
             {t.ctaStart}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
             </svg>
           </Link>
-          <a href="#comment" style={{
+          <a href="#comment" className="lp-cta-ghost" style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             border: '1px solid rgba(240,237,232,0.2)', color: 'rgba(240,237,232,0.7)',
             padding: '12px 24px', borderRadius: '8px', fontSize: '15px', fontWeight: 400,
-            textDecoration: 'none', transition: 'all 0.15s ease',
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(240,237,232,0.4)'; e.currentTarget.style.color = '#F0EDE8' }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(240,237,232,0.2)'; e.currentTarget.style.color = 'rgba(240,237,232,0.7)' }}
-          >
+            textDecoration: 'none',
+          }}>
             {t.ctaHow}
           </a>
         </div>
       </div>
 
-      {/* Mock UI */}
+      {/* Mock UI — box-shadow instead of filter: drop-shadow (avoids expensive offscreen composite) */}
       <div className="lp-mock" style={{
         marginTop: '72px', position: 'relative', width: '100%', maxWidth: '540px',
         transform: 'perspective(1000px) rotateX(4deg)',
-        filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.5))',
+        borderRadius: '12px', overflow: 'hidden',
+        boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
         padding: '0 8px',
       }}>
         <div style={{

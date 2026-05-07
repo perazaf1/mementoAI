@@ -9,7 +9,6 @@ const ICON_STYLE = {
   border: '1px solid rgba(240,237,232,0.12)',
   color: 'rgba(240,237,232,0.45)',
   textDecoration: 'none',
-  transition: 'all 0.15s ease',
 } as const
 
 export default function Footer({ t }: { t: CopyType }) {
@@ -36,19 +35,8 @@ export default function Footer({ t }: { t: CopyType }) {
           href="https://www.linkedin.com/in/perazaf1/"
           target="_blank"
           rel="noopener noreferrer"
+          className="lp-icon-link"
           style={ICON_STYLE}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget as HTMLElement
-            el.style.borderColor = 'rgba(240,237,232,0.35)'
-            el.style.color = '#F0EDE8'
-            el.style.background = 'rgba(240,237,232,0.06)'
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget as HTMLElement
-            el.style.borderColor = 'rgba(240,237,232,0.12)'
-            el.style.color = 'rgba(240,237,232,0.45)'
-            el.style.background = 'transparent'
-          }}
           aria-label="LinkedIn"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -63,19 +51,8 @@ export default function Footer({ t }: { t: CopyType }) {
           href="https://github.com/perazaf1"
           target="_blank"
           rel="noopener noreferrer"
+          className="lp-icon-link"
           style={ICON_STYLE}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget as HTMLElement
-            el.style.borderColor = 'rgba(240,237,232,0.35)'
-            el.style.color = '#F0EDE8'
-            el.style.background = 'rgba(240,237,232,0.06)'
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget as HTMLElement
-            el.style.borderColor = 'rgba(240,237,232,0.12)'
-            el.style.color = 'rgba(240,237,232,0.45)'
-            el.style.background = 'transparent'
-          }}
           aria-label="GitHub"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -87,10 +64,7 @@ export default function Footer({ t }: { t: CopyType }) {
         <div style={{ width: '1px', height: '20px', background: 'rgba(240,237,232,0.1)', margin: '0 2px' }} />
 
         {/* App link */}
-        <Link href="/app" style={{ fontSize: '13px', color: 'rgba(240,237,232,0.45)', textDecoration: 'none', transition: 'color 0.15s ease' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0EDE8')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(240,237,232,0.45)')}
-        >
+        <Link href="/app" className="lp-hover-light" style={{ fontSize: '13px', color: 'rgba(240,237,232,0.45)', textDecoration: 'none' }}>
           {t.footerOpen}
         </Link>
       </div>
